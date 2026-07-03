@@ -270,3 +270,29 @@ def delete_partisipasi(id_partisipasi: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM data_partisipasi_politik WHERE id_partisipasi = ?", (id_partisipasi,))
         conn.commit()
+
+
+def seed_admin():
+    """Seeds the default admin user if the table is empty."""
+    import hashlib
+    username = "admin"
+    password_hash = hashlib.sha256(b"admin123").hexdigest()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT OR IGNORE INTO pengguna (username, password_hash) VALUES (?, ?)
+        """, (username, password_hash))
+        conn.commit()
+
+
+def check_admin_login(username, password) -> bool:
+    """Verifies admin credentials using SHA-256."""
+    import hashlib
+    password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id_pengguna FROM pengguna WHERE username = ? AND password_hash = ?
+        """, (username, password_hash))
+        row = cursor.fetchone()
+        return row is not None

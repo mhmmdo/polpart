@@ -3,6 +3,13 @@ CREATE TABLE IF NOT EXISTS kecamatan (
     nama_kecamatan TEXT NOT NULL UNIQUE
 );
 
+CREATE TABLE IF NOT EXISTS pengguna (
+    id_pengguna INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS data_sosio_ekonomi (
     id_sosio INTEGER PRIMARY KEY AUTOINCREMENT,
     id_kecamatan INTEGER NOT NULL,
