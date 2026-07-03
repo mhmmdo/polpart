@@ -61,7 +61,7 @@ def load_data_from_sidebar():
     
     # Admin Login Gate in Sidebar
     if not st.session_state.get("is_admin", False):
-        with st.sidebar.expander("🔐 Login Admin", expanded=False):
+        with st.sidebar.expander("Login untuk upload data.", expanded=False):
             with st.form("login_form_sidebar"):
                 username = st.text_input("Username", key="login_username_val")
                 password = st.text_input("Password", type="password", key="login_password_val")
@@ -76,7 +76,7 @@ def load_data_from_sidebar():
                     else:
                         st.error("Gagal: Akun salah.")
     else:
-        st.sidebar.markdown('<div style="padding: 10px; background-color: #EAF8F8; border-radius: 8px; border: 1px solid #FFD3C9; margin-bottom: 10px;"><b style="color: #ff7f66;">🔓 Mode Admin Aktif</b></div>', unsafe_allow_html=True)
+        st.sidebar.markdown('<div style="padding: 10px; background-color: #EAF8F8; border-radius: 8px; border: 1px solid #FFD3C9; margin-bottom: 10px;"><b style="color: #ff7f66;">Mode Admin</b></div>', unsafe_allow_html=True)
         if st.sidebar.button("Keluar (Logout)", key="logout_btn_sidebar_action", use_container_width=True):
             st.session_state["is_admin"] = False
             st.rerun()
