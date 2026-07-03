@@ -1,0 +1,35 @@
+polpart_streamlit_rf_pro/
+├── app.py
+├── pages/
+│   ├── 1_Dashboard.py
+│   ├── 2_Data_Historis.py
+│   ├── 3_Prediksi.py
+│   ├── 4_Visualisasi.py
+│   └── 5_Tentang.py
+├── src/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── data_loader.py
+│   ├── model.py
+│   ├── ui.py
+│   ├── utils.py
+│   └── visualizations.py
+├── data/
+│   ├── raw/
+│   │   └── data_partisipasi_politik_sample.csv
+│   ├── geo/
+│   │   └── kecamatan_5.geojson
+│   └── processed/
+│       └── .gitkeep
+├── assets/
+│   └── style.css
+├── models/
+│   └── .gitkeep
+├── scripts/
+│   └── train_model.py
+├── .streamlit/
+│   └── config.toml
+├── .gitignore
+├── PROJECT_TREE.txt
+├── requirements.txt
+└── README.md
