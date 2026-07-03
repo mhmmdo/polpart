@@ -77,7 +77,7 @@ def load_data_from_sidebar():
                         st.error("Gagal: Akun salah.")
     else:
         st.sidebar.markdown('<div style="padding: 10px; background-color: #EAF8F8; border-radius: 8px; border: 1px solid #FFD3C9; margin-bottom: 10px;"><b style="color: #ff7f66;">Mode Admin</b></div>', unsafe_allow_html=True)
-        if st.sidebar.button("Keluar (Logout)", key="logout_btn_sidebar_action", use_container_width=True):
+        if st.sidebar.button("Keluar", key="logout_btn_sidebar_action", use_container_width=True):
             st.session_state["is_admin"] = False
             st.rerun()
             
