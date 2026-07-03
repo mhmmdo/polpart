@@ -44,9 +44,9 @@ else:
 
             left, right = st.columns(2)
             with left:
-                st.plotly_chart(feature_importance_bar(model_result.feature_importance), use_container_width=True)
+                st.plotly_chart(feature_importance_bar(model_result.feature_importance), use_container_width=True, theme=None)
             with right:
-                st.plotly_chart(prediction_scatter(model_result.prediction_result), use_container_width=True)
+                st.plotly_chart(prediction_scatter(model_result.prediction_result), use_container_width=True, theme=None)
 
             st.markdown("#### Hasil Aktual vs Prediksi")
             st.dataframe(model_result.prediction_result, use_container_width=True, hide_index=True)
