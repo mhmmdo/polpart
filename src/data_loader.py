@@ -43,17 +43,20 @@ def load_dataset() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def load_uploaded_data(uploaded_file) -> pd.DataFrame | None:
-    if uploaded_file is None:
-        return None
-    df = pd.read_csv(uploaded_file)
-    df = normalize_columns(df)
-    df = coerce_numeric_columns(df)
-    missing = validate_columns(df)
-    if missing:
-        st.error("Kolom kurang: " + ", ".join(missing))
-        return None
-    return df.dropna().reset_index(drop=True)
+def get_training_dataset() -> pd.DataFrame:
+    """Retrieves dataset_final and drops rows with missing target or features."""
+    df = load_dataset()
+    if df.empty:
+        return pd.DataFrame()
+    cols = [
+        "tingkat_pendidikan",
+        "pendapatan_per_kapita",
+        "tingkat_pengangguran",
+        "kepadatan_penduduk",
+        "ipm",
+        "partisipasi_politik"
+    ]
+    return df.dropna(subset=cols).reset_index(drop=True)
 
 
 @st.cache_data(show_spinner=False)

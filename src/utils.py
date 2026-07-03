@@ -16,9 +16,19 @@ def rename_for_display(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_summary(df: pd.DataFrame) -> dict:
-    average = float(df[TARGET_COLUMN].mean())
-    highest_row = df.loc[df[TARGET_COLUMN].idxmax()]
-    lowest_row = df.loc[df[TARGET_COLUMN].idxmin()]
+    sub = df.dropna(subset=[TARGET_COLUMN])
+    if sub.empty:
+        return {
+            "rows": len(df),
+            "average": 0.0,
+            "highest_area": "N/A",
+            "highest_value": 0.0,
+            "lowest_area": "N/A",
+            "lowest_value": 0.0,
+        }
+    average = float(sub[TARGET_COLUMN].mean())
+    highest_row = sub.loc[sub[TARGET_COLUMN].idxmax()]
+    lowest_row = sub.loc[sub[TARGET_COLUMN].idxmin()]
     return {
         "rows": len(df),
         "average": average,

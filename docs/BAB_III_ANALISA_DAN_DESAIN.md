@@ -125,7 +125,7 @@ VIEW yang digunakan untuk menggabungkan tabel `data_sosio_ekonomi` dan `data_par
 Rancangan antarmuka dirancang bersih dengan skema tata letak (*wireframe*) berbasis Streamlit:
 
 1. **Dashboard**: 
-   - Sidebar: Tombol unggah berkas CSV (opsional) dan filter multiselect kecamatan/tahun.
+   - Sidebar: Informasi sumber data dan filter multiselect kecamatan/tahun.
    - Halaman Utama: Header pahlawan (*hero*), diikuti 4 kartu metrik performa statistik (Jumlah Data, Rata-rata Partisipasi, Kecamatan Tertinggi, Kecamatan Terendah), grafik batang partisipasi per kecamatan, dan grafik garis tren tahunan.
 2. **Data Historis**:
    - Pencarian: Input teks pencarian kecamatan.

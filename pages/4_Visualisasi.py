@@ -20,16 +20,26 @@ if filtered_df.empty:
     st.stop()
 
 st.plotly_chart(correlation_heatmap(filtered_df), use_container_width=True)
-st.plotly_chart(participation_by_area(filtered_df), use_container_width=True)
-st.plotly_chart(participation_trend(filtered_df), use_container_width=True)
 
-st.markdown("---")
-st.markdown("### Peta Partisipasi Politik")
-years = sorted(df["tahun"].dropna().astype(int).unique().tolist())
-selected_map_year = st.selectbox("Pilih tahun peta", years, index=len(years) - 1)
-try:
-    geojson = load_geojson()
-    st.plotly_chart(participation_map(df, geojson, selected_map_year), use_container_width=True)
-    st.caption("Batas wilayah kecamatan pada peta ini menggunakan koordinat simplifikasi sebagai contoh. Silakan ganti dengan file GeoJSON batas wilayah resmi untuk visualisasi geografis yang presisi.")
-except Exception as error:
-    st.warning(f"Peta gagal dimuat: {error}")
+# Filter data to only include non-empty political participation values for the charts and map
+chart_df = filtered_df.dropna(subset=["partisipasi_politik"])
+
+if chart_df.empty:
+    st.warning("Data partisipasi politik belum tersedia.")
+else:
+    st.plotly_chart(participation_by_area(chart_df), use_container_width=True)
+    st.plotly_chart(participation_trend(chart_df), use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("### Peta Partisipasi Politik")
+    years = sorted(chart_df["tahun"].dropna().astype(int).unique().tolist())
+    if not years:
+        st.warning("Data partisipasi politik untuk peta belum tersedia.")
+    else:
+        selected_map_year = st.selectbox("Pilih tahun peta", years, index=len(years) - 1)
+        try:
+            geojson = load_geojson()
+            st.plotly_chart(participation_map(chart_df, geojson, selected_map_year), use_container_width=True)
+            st.caption("Batas wilayah kecamatan pada peta ini menggunakan koordinat simplifikasi sebagai contoh. Silakan ganti dengan file GeoJSON batas wilayah resmi untuk visualisasi geografis yang presisi.")
+        except Exception as error:
+            st.warning(f"Peta gagal dimuat: {error}")
