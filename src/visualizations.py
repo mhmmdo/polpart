@@ -4,18 +4,6 @@ import plotly.express as px
 from src.config import AREA_COLUMN, DISPLAY_NAMES, FEATURE_COLUMNS, TARGET_COLUMN, YEAR_COLUMN
 
 
-def apply_light_theme(fig):
-    fig.update_layout(
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        font_color="#1e293b",
-        title_font_color="#0f172a",
-        xaxis=dict(gridcolor="#f1f5f9", zerolinecolor="#e2e8f0"),
-        yaxis=dict(gridcolor="#f1f5f9", zerolinecolor="#e2e8f0"),
-    )
-    return fig
-
-
 def participation_by_area(df: pd.DataFrame):
     chart_data = (
         df.groupby(AREA_COLUMN, as_index=False)[TARGET_COLUMN]
@@ -34,7 +22,7 @@ def participation_by_area(df: pd.DataFrame):
     )
     fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
     fig.update_layout(yaxis_ticksuffix="%", xaxis_title="", yaxis_title="Partisipasi Politik")
-    return apply_light_theme(fig)
+    return fig
 
 
 def participation_trend(df: pd.DataFrame):
@@ -51,7 +39,7 @@ def participation_trend(df: pd.DataFrame):
         color_discrete_sequence=px.colors.qualitative.Safe,
     )
     fig.update_layout(yaxis_ticksuffix="%", xaxis_title="Tahun", yaxis_title="Partisipasi Politik")
-    return apply_light_theme(fig)
+    return fig
 
 
 def correlation_heatmap(df: pd.DataFrame):
@@ -66,7 +54,7 @@ def correlation_heatmap(df: pd.DataFrame):
         template="plotly_white",
         color_continuous_scale="Blues",
     )
-    return apply_light_theme(fig)
+    return fig
 
 
 def feature_importance_bar(importance_df: pd.DataFrame):
@@ -82,7 +70,7 @@ def feature_importance_bar(importance_df: pd.DataFrame):
     )
     fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
     fig.update_layout(yaxis={"categoryorder": "total ascending"}, xaxis_title="Importance", yaxis_title="")
-    return apply_light_theme(fig)
+    return fig
 
 
 def prediction_scatter(prediction_df: pd.DataFrame):
@@ -106,7 +94,7 @@ def prediction_scatter(prediction_df: pd.DataFrame):
         y1=max_value,
         line={"dash": "dash", "color": "#64748B"},
     )
-    return apply_light_theme(fig)
+    return fig
 
 
 def participation_map(df: pd.DataFrame, geojson: dict, selected_year: int):
@@ -130,4 +118,4 @@ def participation_map(df: pd.DataFrame, geojson: dict, selected_year: int):
         title=f"Peta Partisipasi Politik Tahun {selected_year}",
     )
     fig.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
-    return apply_light_theme(fig)
+    return fig

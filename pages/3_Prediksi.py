@@ -111,7 +111,7 @@ if submit:
     col_c.markdown(f"**IPM**: {ipm:.1f}")
 
 st.markdown("---")
-st.plotly_chart(feature_importance_bar(model_result.feature_importance), use_container_width=True, theme=None)
+st.plotly_chart(feature_importance_bar(model_result.feature_importance), use_container_width=True)
 st.caption("Feature importance menunjukkan kontribusi relatif dari masing-masing variabel terhadap prediksi model Random Forest. Nilai ini didasarkan pada signifikansi statistik dalam model.")
 
 # Prediction History Section
