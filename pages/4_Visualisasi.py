@@ -43,4 +43,3 @@ else:
             st.caption("Batas wilayah kecamatan pada peta ini menggunakan koordinat simplifikasi sebagai contoh. Silakan ganti dengan file GeoJSON batas wilayah resmi untuk visualisasi geografis yang presisi.")
         except Exception as error:
             st.warning(f"Peta gagal dimuat: {error}")
-error}")
