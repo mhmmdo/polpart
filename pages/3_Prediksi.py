@@ -111,7 +111,7 @@ if submit:
     col_c.markdown(f"**IPM**: {ipm:.1f}")
 
 st.markdown("---")
-st.plotly_chart(feature_importance_bar(model_result.feature_importance), use_container_width=True)
+st.plotly_chart(feature_importance_bar(model_result.feature_importance), width="stretch")
 st.caption("Feature importance menunjukkan kontribusi relatif dari masing-masing variabel terhadap prediksi model Random Forest. Nilai ini didasarkan pada signifikansi statistik dalam model.")
 
 # Prediction History Section
@@ -138,6 +138,6 @@ try:
         # Format Rupiah for display
         display_history["Pendapatan per Kapita"] = display_history["Pendapatan per Kapita"].apply(format_rupiah)
         display_history["Hasil Prediksi (%)"] = display_history["Hasil Prediksi (%)"].apply(lambda x: f"{x:.2f}%")
-        st.dataframe(display_history, use_container_width=True, hide_index=True)
+        st.dataframe(display_history, width="stretch", hide_index=True)
 except Exception as e:
     st.error(f"Gagal memuat riwayat prediksi: {e}")

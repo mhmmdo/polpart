@@ -50,13 +50,13 @@ else:
     
     col_left, col_right = st.columns(2)
     with col_left:
-        st.plotly_chart(participation_by_area(chart_df), use_container_width=True)
+        st.plotly_chart(participation_by_area(chart_df), width="stretch")
     with col_right:
-        st.plotly_chart(participation_trend(chart_df), use_container_width=True)
+        st.plotly_chart(participation_trend(chart_df), width="stretch")
 
 st.markdown("---")
 st.markdown("### Statistik Sederhana")
 st.dataframe(
     filtered_df.select_dtypes(include='number').describe().T,
-    use_container_width=True,
+    width="stretch",
 )

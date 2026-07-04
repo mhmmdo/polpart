@@ -27,7 +27,7 @@ else:
             filtered_df = filtered_df[filtered_df["kecamatan"].str.contains(keyword, case=False, na=False)]
 
         st.markdown("### Tabel Data")
-        st.dataframe(rename_for_display(filtered_df), use_container_width=True, hide_index=True)
+        st.dataframe(rename_for_display(filtered_df), width="stretch", hide_index=True)
 
         csv = filtered_df.to_csv(index=False).encode("utf-8")
         st.download_button("Download data hasil filter", data=csv, file_name="data_hasil_filter.csv", mime="text/csv")
@@ -44,11 +44,11 @@ else:
 
             left, right = st.columns(2)
             with left:
-                st.plotly_chart(feature_importance_bar(model_result.feature_importance), use_container_width=True)
+                st.plotly_chart(feature_importance_bar(model_result.feature_importance), width="stretch")
             with right:
-                st.plotly_chart(prediction_scatter(model_result.prediction_result), use_container_width=True)
+                st.plotly_chart(prediction_scatter(model_result.prediction_result), width="stretch")
 
             st.markdown("#### Hasil Aktual vs Prediksi")
-            st.dataframe(model_result.prediction_result, use_container_width=True, hide_index=True)
+            st.dataframe(model_result.prediction_result, width="stretch", hide_index=True)
         except ValueError as error:
             st.warning(str(error))

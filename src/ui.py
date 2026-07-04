@@ -77,13 +77,20 @@ def load_data_from_sidebar():
                         st.error("Gagal: Akun salah.")
     else:
         st.sidebar.markdown('<div style="padding: 10px; background-color: #EAF8F8; border-radius: 8px; border: 1px solid #FFD3C9; margin-bottom: 10px;"><b style="color: #ff7f66;">Mode Admin</b></div>', unsafe_allow_html=True)
-        if st.sidebar.button("Keluar", key="logout_btn_sidebar_action", use_container_width=True):
+        if st.sidebar.button("Keluar", key="logout_btn_sidebar_action", width="stretch"):
             st.session_state["is_admin"] = False
             st.rerun()
             
     # Drag-and-drop CSV importer directly in sidebar - ONLY visible to logged-in Admin
     if st.session_state.get("is_admin", False):
-        uploaded_file = st.sidebar.file_uploader("Unggah File CSV untuk Impor Baru", type=["csv"], key="sidebar_csv_uploader_ui")
+        if "uploader_reset_key" not in st.session_state:
+            st.session_state["uploader_reset_key"] = 0
+        uploaded_file = st.sidebar.file_uploader(
+            "Unggah File CSV untuk Impor Baru",
+            type=["csv"],
+            key=f"csv_uploader_{st.session_state.uploader_reset_key}",
+            label_visibility="visible",
+        )
         if uploaded_file is not None:
             try:
                 import pandas as pd
@@ -179,6 +186,7 @@ def load_data_from_sidebar():
                                 skipped_count += 1
                                 
                         conn.commit()
+                    st.session_state["uploader_reset_key"] += 1
                     st.sidebar.success(f"Berhasil impor {success_count} data!")
                     st.rerun()
             except Exception as e:
