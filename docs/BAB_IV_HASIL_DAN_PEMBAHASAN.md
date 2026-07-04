@@ -18,11 +18,7 @@ Halaman Data Historis (`pages/2_Data_Historis.py`) menyajikan antarmuka pengolah
 - Tombol unduh data hasil filter ke dalam berkas berekstensi CSV.
 - Menampilkan nilai RMSE, koefisien determinasi R², jumlah data latih, dan jumlah data uji yang dihasilkan oleh proses fit model Random Forest terhadap dataset aktif.
 - Menampilkan visualisasi tingkat kontribusi fitur (*feature importance*) dan diagram pencar (*scatter plot*) perbandingan nilai aktual vs prediksi.
-- **Manajemen Input Data**: Menyediakan dua widget expander berisi formulir input manual:
-  1. *Form Data Sosio-Ekonomi*: Memasukkan tahun, pilihan kecamatan, tingkat pendidikan, pendapatan per kapita, tingkat pengangguran, kepadatan penduduk, dan IPM.
-  2. *Form Data Partisipasi Politik*: Memasukkan tahun, pilihan kecamatan, jumlah DPT, jumlah pengguna hak pilih, dan sumber data. Persentase partisipasi politik secara otomatis dihitung dengan rumus:
-     $$\text{Partisipasi Politik} = \frac{\text{Pengguna Hak Pilih}}{\text{DPT}} \times 100$$
-- Penyimpanan data baru menggunakan operasi SQL `INSERT ON CONFLICT DO UPDATE` (upsert) ke database SQLite. Halaman akan dimuat ulang (`st.rerun()`) otomatis setelah penyimpanan berhasil.
+- **Manajemen Input Data**: Menyediakan fitur unggah CSV di sidebar untuk melakukan import/update data secara massal ke database SQLite menggunakan operasi `INSERT ON CONFLICT DO UPDATE` (upsert).
 
 ### 4.1.3 Implementasi Halaman Prediksi
 Halaman Prediksi (`pages/3_Prediksi.py`) digunakan oleh pengguna untuk melakukan estimasi tingkat partisipasi politik baru secara interaktif:
@@ -35,8 +31,8 @@ Halaman Prediksi (`pages/3_Prediksi.py`) digunakan oleh pengguna untuk melakukan
 ### 4.1.4 Implementasi Halaman Visualisasi
 Halaman Visualisasi (`pages/4_Visualisasi.py`) menampilkan visualisasi analisis data terpadu:
 - Grafik heatmap matriks korelasi Pearson antar-variabel masukan dan target untuk melihat tingkat hubungan (positif/negatif).
-- Grafik aktual vs prediksi dan pentingnya variabel.
-- **Peta Partisipasi Politik**: Menampilkan peta choropleth wilayah kecamatan Banjarmasin menggunakan integrasi berkas `data/geo/kecamatan_5.geojson`. Sistem memetakan warna wilayah secara dinamis dengan mencocokkan nama kecamatan dari basis data ke atribut `properties.WADMKC` pada file GeoJSON.
+- Grafik batang partisipasi per kecamatan dan grafik garis tren partisipasi tahunan.
+- **Peta Partisipasi Politik**: Menampilkan peta choropleth wilayah kecamatan Banjarmasin menggunakan Plotly dengan integrasi berkas `data/geo/kecamatan_5.geojson`. Sistem memetakan warna wilayah secara dinamis dengan mencocokkan nama kecamatan dari basis data ke atribut `properties.WADMKC` pada file GeoJSON.
 
 ### 4.1.5 Implementasi Halaman Tentang
 Halaman Tentang (`pages/5_Tentang.py`) menyajikan dokumentasi aplikasi secara komprehensif bagi pengguna. Halaman ini menjelaskan dasar teori metode Random Forest Regressor, alur jalannya data dalam sistem, daftar sumber data resmi (BPS dan KPU), serta diagram struktur tabel database SQLite lokal.

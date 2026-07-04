@@ -22,5 +22,5 @@ Pengujian Black Box digunakan untuk memvalidasi fungsionalitas antarmuka dan int
 | 12| Peta GeoJSON | Membuka halaman Visualisasi bagian Peta Partisipasi Politik | Peta choropleth interaktif kecamatan ter-render dan warna gradasi terisi sesuai data | Berhasil |
 | 13| Halaman Tentang | Mengklik menu Tentang Aplikasi pada navigasi | Menampilkan informasi penjelasan alur sistem, metode Random Forest, dan rancangan database | Berhasil |
 | 14| Log Riwayat Prediksi | Menjalankan fitur prediksi lalu melihat tabel Riwayat Prediksi di bagian bawah | Parameter input beserta nilai persentase estimasi hasil prediksi tersimpan ke SQLite dan muncul di tabel | Berhasil |
-| 15| Input Data Sosio-Ekonomi | Mengisi form manual sosio-ekonomi di halaman Data Historis dan menekan tombol Simpan | Data tersimpan ke SQLite, memicu penyegaran halaman, dan data baru muncul di tabel utama | Berhasil |
-| 16| Input Data Partisipasi | Mengisi form manual partisipasi politik, memasukkan angka DPT & Hak Pilih, lalu menekan Simpan | Persentase dihitung otomatis, data tersimpan ke SQLite, memicu penyegaran halaman, dan data ter-update | Berhasil |
+| 15| Upload CSV via Sidebar | Unggah file CSV melalui sidebar uploader | Data di-upsert ke SQLite, uploader di-reset, muncul pesan sukses, data baru muncul di tabel | Berhasil |
+| 16| Filter & Download | Gunakan filter tahun/kecamatan lalu klik tombol download CSV | File CSV terdownload sesuai hasil filter yang aktif | Berhasil |

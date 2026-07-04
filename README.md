@@ -53,10 +53,11 @@ polpart_streamlit_rf_pro/
 ## Fitur Utama
 
 1. **Dashboard**: Ringkasan data (rata-rata, tertinggi, terendah), grafik partisipasi per kecamatan, dan tren tahunan yang diambil dari SQLite.
-2. **Data Historis**: Tabel data dari database, fitur pencarian, filter tahun/wilayah, serta evaluasi model Random Forest (RMSE, R²). Menyediakan formulir manual untuk memasukkan data sosio-ekonomi dan partisipasi politik baru secara dinamis ke database.
+2. **Data Historis**: Tabel data dari database, fitur pencarian, filter tahun/wilayah, download CSV, serta evaluasi model Random Forest (RMSE, R², Feature Importance, scatter aktual vs prediksi). Data diperbarui melalui unggah CSV di sidebar.
 3. **Prediksi**: Memprediksi tingkat partisipasi politik berdasarkan input variabel sosio-ekonomi. Riwayat prediksi disimpan ke database dan ditampilkan di tabel bagian bawah.
-4. **Visualisasi**: Matriks korelasi antar variabel, grafik aktual vs prediksi, dan peta choropleth kecamatan Banjarmasin menggunakan GeoJSON.
-5. **Tentang**: Informasi detail metode Random Forest, alur sistem, dan deskripsi tabel database.
+4. **Visualisasi**: Matriks korelasi antar variabel, grafik tren & perbandingan, dan peta choropleth kecamatan Banjarmasin menggunakan Plotly + GeoJSON.
+5. **Tentang**: Informasi detail metode Random Forest, alur sistem, sumber data, dan deskripsi tabel database.
+6. **Upload CSV**: Unggah CSV melalui sidebar untuk import/update data langsung ke SQLite (upsert), tanpa perlu script CLI.
 
 ---
 
@@ -85,12 +86,8 @@ Format kolom CSV wajib:
 tahun,kecamatan,tingkat_pendidikan,pendapatan_per_kapita,tingkat_pengangguran,kepadatan_penduduk,ipm,partisipasi_politik
 ```
 
-### 4. Import Data dari CSV ke SQLite
-Jalankan skrip import berikut untuk memuat data dari CSV template ke database SQLite:
-
-```bash
-python scripts/import_csv_to_sqlite.py
-```
+### 4. (Opsional) Import Data via UI
+Anda bisa mengunggah CSV langsung melalui widget di sidebar. Sistem akan melakukan upsert data ke database tanpa perlu script CLI.
 
 ### 5. Jalankan Aplikasi Streamlit
 Setelah database terisi, jalankan aplikasi web Streamlit:
@@ -108,4 +105,5 @@ streamlit run app.py
   python scripts/train_model.py
   ```
   Model yang dilatih akan disimpan ke `models/random_forest_partisipasi.joblib`.
-* **GeoJSON**: Peta kecamatan dicocokkan menggunakan kode/nama kecamatan pada atribut GeoJSON `WADMKC` dengan nama kecamatan yang tersimpan di database.
+* **GeoJSON**: Peta kecamatan menggunakan Plotly choropleth dengan file GeoJSON (`data/geo/kecamatan_5.geojson`), dicocokkan berdasarkan nama kecamatan pada atribut `WADMKC`.
+* **Upload CSV**: Unggah file CSV melalui sidebar untuk mengimpor/memperbarui data langsung ke database (upsert). Tidak perlu menjalankan script CLI untuk import data..

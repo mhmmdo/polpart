@@ -43,9 +43,9 @@ Untuk mengatasi kelemahan di atas, diusulkan sebuah sistem prediksi partisipasi 
 
 Sistem dibagi menjadi 5 modul antarmuka:
 1. **Dashboard**: Menyajikan metrik ringkasan data, grafik partisipasi per kecamatan, dan tren tahunan.
-2. **Data Historis**: Menyajikan tabel data terpadu dan menyediakan form input data sosio-ekonomi dan partisipasi baru secara manual.
+2. **Data Historis**: Menyajikan tabel data terpadu, fitur pencarian/filter, download CSV, serta evaluasi model Random Forest. Data diperbarui melalui unggah CSV di sidebar.
 3. **Prediksi**: Form input variabel sosio-ekonomi untuk menghitung estimasi persentase partisipasi politik dilengkapi tabel riwayat prediksi.
-4. **Visualisasi**: Menyajikan grafik korelasi variabel, perbandingan aktual vs prediksi, dan peta choropleth.
+4. **Visualisasi**: Menyajikan grafik heatmap korelasi variabel, grafik tren & perbandingan partisipasi, dan peta choropleth interaktif menggunakan Plotly + GeoJSON.
 5. **Tentang**: Menyajikan informasi dokumentasi alur kerja sistem.
 
 ---
@@ -57,7 +57,7 @@ Sistem ini menggunakan flowchart terpisah untuk masing-masing fungsionalitas uta
 *(Diagram alir proses dapat dilihat pada dokumen [FLOWCHART_SISTEM.md](FLOWCHART_SISTEM.md))*
 
 ### 3.4.2 Use Case Diagram
-Pengguna/Admin berinteraksi secara penuh dengan aplikasi untuk mengimpor data, mengelola baris data lewat form, melihat metrik performa model, mengeksekusi fungsi prediksi, dan menganalisa grafik visualisasi.
+Pengguna berinteraksi secara penuh dengan aplikasi untuk mengimpor data, melihat metrik performa model, mengeksekusi fungsi prediksi, dan menganalisa grafik visualisasi.
 *(Diagram use case dapat dilihat pada dokumen [USE_CASE_DIAGRAM.md](USE_CASE_DIAGRAM.md))*
 
 ### 3.4.3 Class Diagram

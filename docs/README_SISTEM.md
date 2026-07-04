@@ -3,10 +3,11 @@
 ## 1. Deskripsi Sistem
 Sistem Prediksi Partisipasi Politik adalah sebuah aplikasi berbasis web yang dirancang untuk membantu dalam menganalisis dan memprediksi tingkat partisipasi politik masyarakat di tingkat kecamatan. Aplikasi ini menyajikan:
 - **Dashboard**: Menampilkan ringkasan statistik dan grafik partisipasi per kecamatan serta tren tahunan.
-- **Data Historis**: Menyajikan tabel data sosio-ekonomi dan partisipasi politik langsung dari database, serta dilengkapi formulir untuk penambahan/pembaruan data secara manual.
+- **Data Historis**: Menyajikan tabel data sosio-ekonomi dan partisipasi politik langsung dari database, fitur pencarian/filter, download CSV, serta evaluasi model Random Forest (RMSE, R², Feature Importance, scatter aktual vs prediksi). Data diperbarui melalui unggah CSV di sidebar.
 - **Prediksi RF**: Melakukan prediksi persentase partisipasi politik menggunakan algoritma Random Forest Regression berdasarkan indikator sosial ekonomi.
-- **Visualisasi & Peta**: Menyajikan visualisasi korelasi antar-variabel, plot evaluasi aktual vs prediksi, dan peta choropleth berbasis koordinat geografis.
-- **Tentang Aplikasi**: Menyediakan penjelasan metodologi, alur sistem, dan deskripsi database.
+- **Visualisasi & Peta**: Menyajikan visualisasi korelasi antar-variabel, grafik tren partisipasi, dan peta choropleth berbasis Plotly + GeoJSON.
+- **Tentang Aplikasi**: Menyediakan penjelasan metodologi, alur sistem, sumber data, dan deskripsi database.
+- **Upload CSV**: Unggah file CSV melalui sidebar untuk melakukan import/update data langsung ke database SQLite (upsert) tanpa perlu script CLI.
 
 ---
 
@@ -18,7 +19,7 @@ Sistem dikembangkan menggunakan tumpukan teknologi modern berbasis Python beriku
 - **Analisis Data**: Pandas dan NumPy
 - **Machine Learning**: Scikit-learn (Random Forest Regressor)
 - **Visualisasi Grafik**: Plotly
-- **Visualisasi Peta**: Folium & Streamlit-Folium (menggunakan berkas GeoJSON)
+- **Visualisasi Peta**: Plotly Choropleth (menggunakan berkas GeoJSON)
 
 ---
 
@@ -91,11 +92,15 @@ Jalankan skrip inisialisasi untuk membuat database `polpart.db` beserta tabel-ta
 python scripts/init_db.py
 ```
 
-### Langkah 3: Impor Data Awal dari CSV
-Jalankan skrip berikut untuk membaca data dari template CSV (`data/import/data_final_template.csv`) dan menyimpannya ke dalam database SQLite:
+### Langkah 3: (Opsional) Import Data
+Anda dapat mengimpor data melalui dua cara:
+
+**A. Via CLI:**
 ```bash
 python scripts/import_csv_to_sqlite.py
 ```
+
+**B. Via UI:** Unggah file CSV langsung melalui widget uploader di sidebar aplikasi.
 
 ### Langkah 4: Menjalankan Aplikasi Streamlit
 Jalankan server Streamlit untuk membuka aplikasi di web browser Anda:
@@ -103,3 +108,4 @@ Jalankan server Streamlit untuk membuka aplikasi di web browser Anda:
 streamlit run app.py
 ```
 Aplikasi secara otomatis akan terbuka di peramban web pada alamat default `http://localhost:8501`.
+//localhost:8501`.

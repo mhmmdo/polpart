@@ -24,11 +24,12 @@ Pada aplikasi ini, Random Forest digunakan untuk memprediksi **tingkat partisipa
 1. Pengguna membuka aplikasi Streamlit.
 2. Sistem membaca dataset dari **database SQLite (polpart.db)** melalui VIEW `dataset_final`.
 3. Data ditampilkan pada dashboard dan tabel historis.
-4. Sistem melatih model Random Forest menggunakan data historis dari database.
-5. Pengguna mengisi form input variabel pada menu Prediksi.
-6. Sistem menampilkan hasil prediksi partisipasi politik dan **menyimpan riwayat hasil prediksi ke database**.
-7. Sistem menampilkan evaluasi model seperti RMSE, R², dan Feature Importance, serta menyimpan log evaluasi ke database.
-8. Halaman Visualisasi memetakan tingkat partisipasi politik menggunakan file GeoJSON yang dicocokkan dengan nama kecamatan dari database.
+4. Pengguna dapat mengunggah CSV melalui sidebar untuk mengimpor/memperbarui data langsung ke database.
+5. Sistem melatih model Random Forest menggunakan data historis dari database secara otomatis saat halaman Prediksi atau Data Historis dibuka.
+6. Pengguna mengisi form input variabel pada menu Prediksi.
+7. Sistem menampilkan hasil prediksi partisipasi politik dan **menyimpan riwayat hasil prediksi ke database**.
+8. Sistem menampilkan evaluasi model seperti RMSE, R², dan Feature Importance, serta menyimpan log evaluasi ke database.
+9. Halaman Visualisasi menampilkan heatmap korelasi, grafik tren & perbandingan, serta peta choropleth menggunakan Plotly + GeoJSON yang dicocokkan dengan nama kecamatan dari database.
 
 ### Sumber Data yang Digunakan
 
@@ -47,6 +48,6 @@ Database lokal tersimpan di `database/polpart.db` dengan tabel-tabel utama:
 
 ### Catatan Penting
 
-Dataset bawaan aplikasi ini merupakan data simulasi/template untuk tujuan demonstrasi sistem. Untuk analisis akademik, laporan resmi, atau pengambilan kebijakan, Anda dapat menambahkan data valid secara dinamis melalui form input di halaman **Data Historis**.
+Dataset bawaan aplikasi ini merupakan data simulasi/template untuk tujuan demonstrasi sistem. Untuk analisis akademik, laporan resmi, atau pengambilan kebijakan, Anda dapat menambahkan data valid melalui fitur **Upload CSV** di sidebar.
 """
 )

@@ -30,12 +30,12 @@ flowchart TD
 
 ---
 
-## 2. Flowchart Import Data
-Menggambarkan alur pengunggahan data dari berkas CSV awal ke dalam basis data SQLite melalui terminal.
+## 2. Flowchart Import Data (CLI)
+Menggambarkan alur pengunggahan data dari berkas CSV ke dalam basis data SQLite melalui **terminal/CLI**.
 
 ### Deskripsi Alur:
 1. Mulai.
-2. Admin menyiapkan berkas CSV di path `data/import/data_final_template.csv`.
+2. Siapkan berkas CSV di path `data/import/data_final_template.csv`.
 3. Jalankan skrip import (`python scripts/import_csv_to_sqlite.py`).
 4. Sistem membaca file CSV.
 5. Validasi ketersediaan kolom wajib (`tahun` dan `kecamatan`).
@@ -46,7 +46,7 @@ Menggambarkan alur pengunggahan data dari berkas CSV awal ke dalam basis data SQ
 ### Diagram Mermaid:
 ```mermaid
 flowchart TD
-    A([Mulai]) --> B[Admin Siapkan data_final_template.csv]
+    A([Mulai]) --> B[Siapkan data_final_template.csv]
     B --> C[Jalankan Script import_csv_to_sqlite.py]
     C --> D[Sistem Membaca CSV]
     D --> E{Apakah Kolom Wajib Ada?}
@@ -56,6 +56,30 @@ flowchart TD
     H --> I[Tampilkan Jumlah Berhasil Diimport]
     F --> J([Selesai])
     I --> J
+```
+
+### Flowchart Import Data (UI Upload)
+Menggambarkan alur unggah data melalui sidebar aplikasi web.
+
+### Deskripsi Alur:
+1. Mulai.
+2. Pengguna mengunggah file CSV melalui widget file uploader di sidebar.
+3. Sistem membaca & memvalidasi kolom CSV.
+4. Upsert data ke tabel `data_sosio_ekonomi` dan `data_partisipasi_politik`.
+5. Reset uploader, tampilkan pesan sukses.
+6. Selesai.
+
+### Diagram Mermaid:
+```mermaid
+flowchart TD
+    A([Mulai]) --> B[Pengguna Unggah File CSV di Sidebar]
+    B --> C[Sistem Membaca CSV]
+    C --> D{Apakah Kolom Wajib Ada?}
+    D -- Tidak --> E[Tampilkan Error]
+    D -- Ya --> F[Loop Tiap Baris: Upsert ke SQLite]
+    F --> G[Reset Uploader & Tampilkan Sukses]
+    E --> H([Selesai])
+    G --> H
 ```
 
 ---
@@ -145,14 +169,14 @@ flowchart TD
 ---
 
 ## 6. Flowchart Visualisasi dan Peta
-Menggambarkan alur pembacaan data geografis (GeoJSON) dan data statistik untuk dipetakan.
+Menggambarkan alur pembacaan data geografis (GeoJSON) dan data statistik untuk ditampilkan.
 
 ### Deskripsi Alur:
 1. Mulai.
 2. Ambil data spasial dari file `kecamatan_5.geojson`.
 3. Ambil data partisipasi politik dari VIEW `dataset_final` SQLite.
 4. Lakukan pencocokan (matching) data berdasarkan nama kecamatan dengan properti `properties.WADMKC` pada file GeoJSON.
-5. Tampilkan grafik korelasi (heatmap), grafik perbandingan aktual vs prediksi, dan peta choropleth kecamatan Banjarmasin.
+5. Tampilkan grafik korelasi heatmap, grafik batang partisipasi per kecamatan, grafik tren tahunan, dan peta choropleth kecamatan Banjarmasin menggunakan Plotly.
 6. Selesai.
 
 ### Diagram Mermaid:
@@ -161,7 +185,8 @@ flowchart TD
     A([Mulai]) --> B[Ambil Berkas GeoJSON Kecamatan]
     B --> C[Ambil Data Partisipasi dari SQLite]
     C --> D[Cocokkan Nama Kecamatan dengan properties.WADMKC]
-    D --> E[Render Grafik Korelasi & Scatter Aktual vs Prediksi]
-    E --> F[Render Peta Choropleth Kecamatan]
-    F --> G([Selesai])
+    D --> E[Render Grafik Heatmap Korelasi]
+    E --> F[Render Grafik Batang & Tren Tahunan]
+    F --> G[Render Peta Choropleth Kecamatan via Plotly]
+    G --> H([Selesai])
 ```

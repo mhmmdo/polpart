@@ -3,13 +3,13 @@
 ## 1. Deskripsi Narasi
 Use case diagram menggambarkan interaksi pengguna dengan sistem prediksi partisipasi politik. Pengguna dapat mengelola data melalui proses import, melihat dashboard, menjalankan prediksi, melihat evaluasi model, dan menampilkan visualisasi data.
 
-Sistem ini didesain dalam bentuk aplikasi mandiri (single user/admin) di mana pengguna bertindak sebagai Admin sekaligus operator analisis sistem.
+Sistem ini didesain dalam bentuk aplikasi mandiri di mana pengguna dapat mengoperasikan seluruh fitur analisis dan prediksi.
 
 ---
 
 ## 2. Definisi Aktor
 Sistem ini berinteraksi dengan satu aktor utama:
-- **Admin/Pengguna**: Aktor yang mengoperasikan sistem mulai dari mengimpor data awal, mengelola basis data, melihat dashboard statistik, melatih model, melakukan prediksi tingkat partisipasi politik, dan meninjau visualisasi geografis.
+- **Pengguna**: Aktor yang mengoperasikan sistem mulai dari mengimpor data awal, mengelola basis data, melihat dashboard statistik, melatih model, melakukan prediksi tingkat partisipasi politik, dan meninjau visualisasi geografis.
 
 ---
 
@@ -37,7 +37,7 @@ Berikut adalah visualisasi Use Case Diagram menggunakan notasi Mermaid:
 ```mermaid
 graph TD
     %% Define Actor
-    Pengguna([Admin / Pengguna])
+    Pengguna([Pengguna])
 
     subgraph Sistem Prediksi Partisipasi Politik
         UC1[Membuka Aplikasi]
@@ -69,4 +69,6 @@ graph TD
     Pengguna --> UC11
     Pengguna --> UC12
     Pengguna --> UC13
+```
+na --> UC13
 ```
