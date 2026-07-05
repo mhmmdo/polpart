@@ -7,3 +7,4 @@ models/*.joblib
 data/processed/*
 !data/processed/.gitkeep
 .streamlit/secrets.toml
+.commandcode/
