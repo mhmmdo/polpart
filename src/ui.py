@@ -1,3 +1,8 @@
+"""
+Modul untuk mengatur elemen antarmuka pengguna (UI) menggunakan Streamlit.
+Berisi fungsi-fungsi untuk menampilkan header, kartu metrik (metric card),
+dan sidebar untuk filter serta unggah data.
+"""
 import streamlit as st
 
 from src.config import APP_SUBTITLE, APP_TITLE, STYLE_PATH

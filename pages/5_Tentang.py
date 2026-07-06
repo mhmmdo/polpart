@@ -2,9 +2,12 @@ import streamlit as st
 
 from src.ui import render_header, setup_page
 
+# Mengatur judul halaman web
 setup_page("Tentang")
+# Menampilkan teks header di bagian atas
 render_header("Tentang Aplikasi", "Penjelasan metode Random Forest, alur sistem, dan sumber data.")
 
+# st.markdown digunakan untuk menuliskan teks panjang yang diformat dengan gaya markdown (seperti huruf tebal, list, dll)
 st.markdown(
     """
 ### Metode Random Forest

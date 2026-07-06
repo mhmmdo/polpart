@@ -1,3 +1,7 @@
+"""
+Modul yang bertanggung jawab untuk membuat grafik dan visualisasi data 
+menggunakan library Plotly (seperti bar chart, line chart, peta choropleth, dll).
+"""
 import pandas as pd
 import plotly.express as px
 

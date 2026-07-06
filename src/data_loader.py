@@ -1,3 +1,7 @@
+"""
+Modul ini bertanggung jawab untuk memuat dan memproses data awal 
+sebelum digunakan oleh aplikasi (seperti membaca data dari database atau membersihkan data).
+"""
 import json
 from pathlib import Path
 from typing import Iterable

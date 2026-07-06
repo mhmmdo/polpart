@@ -1,17 +1,25 @@
+"""
+Script untuk mengimpor data dari file CSV template ke dalam database SQLite.
+Proses ini akan membaca file CSV, memvalidasi kolom, membersihkan data,
+dan memasukkan (insert/update) ke tabel data_sosio_ekonomi dan data_partisipasi_politik.
+"""
 import sqlite3
 import pandas as pd
 from pathlib import Path
 import sys
 
+# Menambahkan root folder project ke path agar dapat import modul src
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT_DIR))
 
 from src.config import DB_PATH
 from src.database import get_connection, get_kecamatan_id_by_name
 
+# Path default untuk file CSV yang akan diimpor
 CSV_PATH = ROOT_DIR / "data" / "import" / "data_final_template.csv"
 
 def main():
+    """Fungsi utama untuk menjalankan proses impor CSV ke database."""
     if not CSV_PATH.exists():
         print(f"Error: File CSV tidak ditemukan di {CSV_PATH}")
         print("Pastikan Anda sudah meletakkan template CSV di folder tersebut.")

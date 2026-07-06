@@ -1,6 +1,13 @@
+"""
+File konfigurasi utama untuk aplikasi polpart.
+Berisi definisi path file, pengaturan kolom dataset, dan hyperparameter model.
+"""
 from pathlib import Path
 
+# Mendefinisikan direktori dasar (root project)
 BASE_DIR = Path(__file__).resolve().parents[1]
+
+# Path untuk data, model, database, dan aset
 DATA_DIR = BASE_DIR / "data"
 RAW_DATA_PATH = DATA_DIR / "raw" / "data_partisipasi_politik_sample.csv"
 GEOJSON_PATH = DATA_DIR / "geo" / "kecamatan_5.geojson"

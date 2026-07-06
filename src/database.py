@@ -1,3 +1,12 @@
+"""
+Modul yang berisi fungsi-fungsi untuk berinteraksi dengan database SQLite.
+Menangani operasi CRUD (Create, Read, Update, Delete) untuk tabel-tabel:
+- kecamatan
+- data_sosio_ekonomi
+- data_partisipasi_politik
+- hasil_prediksi
+- model_evaluasi
+"""
 import sqlite3
 import os
 import pandas as pd

@@ -1,3 +1,7 @@
+"""
+Modul utilitas yang berisi fungsi-fungsi bantuan, 
+seperti format angka (persentase, rupiah) dan perhitungan ringkasan data.
+"""
 import pandas as pd
 
 from src.config import DISPLAY_NAMES, TARGET_COLUMN
