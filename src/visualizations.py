@@ -102,9 +102,16 @@ def prediction_scatter(prediction_df: pd.DataFrame):
 
 
 def participation_map(df: pd.DataFrame, geojson: dict, selected_year: int):
+    # Filter by selected year
     map_data = df[df[YEAR_COLUMN] == selected_year].copy()
     if map_data.empty:
-        map_data = df.groupby(AREA_COLUMN, as_index=False)[TARGET_COLUMN].mean()
+        map_data = df.copy()
+        
+    # Group TPS level data into kecamatan level averages for the map
+    map_data = map_data.groupby(AREA_COLUMN, as_index=False)[TARGET_COLUMN].mean()
+    
+    # Convert uppercase kecamatan name (e.g. 'BANJARMASIN TIMUR') to Title Case (e.g. 'Banjarmasin Timur') to match GeoJSON properties.WADMKC
+    map_data[AREA_COLUMN] = map_data[AREA_COLUMN].astype(str).str.title()
 
     fig = px.choropleth_mapbox(
         map_data,
