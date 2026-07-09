@@ -17,7 +17,7 @@ df = load_data_from_sidebar()
 
 # Mengecek apakah database kosong (belum ada data)
 if df.empty:
-    st.warning("Database kosong atau belum diinisialisasi. Silakan jalankan `python scripts/init_db.py` dan `python scripts/import_csv_to_sqlite.py` untuk menginisialisasi database dan mengimpor data awal.")
+    st.warning("Database kosong atau belum diinisialisasi. Hubungi Admin untuk mengunggah CSV data awal.")
     st.stop() # Menghentikan eksekusi kode di bawahnya jika data kosong
 
 # Menangkap pilihan tahun dan kecamatan dari filter di sidebar (menu sebelah kiri)
@@ -40,7 +40,7 @@ if not has_partisipasi:
     
     col1, col2 = st.columns(2) # Membagi layar menjadi 2 kolom
     with col1:
-        st.html(custom_metric_card("JUMLAH DATA", str(len(filtered_df)), "", "Data Sosio-Ekonomi", "neutral"))
+        st.html(custom_metric_card("JUMLAH DATA", str(len(filtered_df)), "", "Data Demografi & Pemilu", "neutral"))
     with col2:
         st.html(custom_metric_card("RATA-RATA PARTISIPASI", "N/A", "", "Data belum tersedia", "down"))
 else:
@@ -48,7 +48,7 @@ else:
     summary = get_summary(filtered_df)
     col1, col2, col3, col4 = st.columns(4) # Membagi layar menjadi 4 kolom untuk menampilkan metrik (kartu angka)
     with col1:
-        st.html(custom_metric_card("JUMLAH DATA", str(summary["rows"]), "", "Data Sosio-Ekonomi & Pemilu", "neutral"))
+        st.html(custom_metric_card("JUMLAH DATA", str(summary["rows"]), "", "Data Demografi & Pemilu", "neutral"))
     with col2:
         st.html(custom_metric_card("RATA-RATA PARTISIPASI", format_percent(summary["average"]), "", "+2.5% dibanding target KPU", "up"))
     with col3:
@@ -63,11 +63,9 @@ else:
     
     col_left, col_right = st.columns(2) # Membagi area grafik menjadi 2 (kiri dan kanan)
     with col_left:
-        # Menggambar grafik batang partisipasi per kecamatan
-        st.plotly_chart(participation_by_area(chart_df), width="stretch")
+        st.plotly_chart(participation_by_area(chart_df), use_container_width=True, theme=None)
     with col_right:
-        # Menggambar grafik garis tren partisipasi dari tahun ke tahun
-        st.plotly_chart(participation_trend(chart_df), width="stretch")
+        st.plotly_chart(participation_trend(chart_df), use_container_width=True, theme=None)
 
 st.markdown("---") # Membuat garis pemisah
 st.markdown("### Statistik Sederhana")

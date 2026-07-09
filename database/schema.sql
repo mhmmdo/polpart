@@ -7,50 +7,42 @@ CREATE TABLE IF NOT EXISTS pengguna (
     id_pengguna INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'user', -- 'admin' atau 'user'
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS data_sosio_ekonomi (
-    id_sosio INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_kecamatan INTEGER NOT NULL,
-    tahun INTEGER NOT NULL,
-    tingkat_pendidikan REAL,
-    pendapatan_per_kapita REAL,
-    tingkat_pengangguran REAL,
-    kepadatan_penduduk REAL,
-    ipm REAL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_kecamatan) REFERENCES kecamatan(id_kecamatan),
-    UNIQUE(id_kecamatan, tahun)
-);
-
-CREATE TABLE IF NOT EXISTS data_partisipasi_politik (
-    id_partisipasi INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_kecamatan INTEGER NOT NULL,
-    tahun INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS data_partisipasi_tps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tahun_pemilu INTEGER NOT NULL,
+    kecamatan TEXT NOT NULL,
+    kelurahan TEXT NOT NULL,
+    no_tps TEXT NOT NULL,
+    id_record TEXT,
+    jenis_kelamin TEXT,
     dpt INTEGER,
     pengguna_hak_pilih INTEGER,
     partisipasi_politik REAL,
-    sumber_data TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_kecamatan) REFERENCES kecamatan(id_kecamatan),
-    UNIQUE(id_kecamatan, tahun)
+    dpt_total_tps INTEGER,
+    penduduk_total_kelurahan TEXT,
+    rasio_dpt_terhadap_penduduk_kelurahan REAL,
+    persen_usia_17_24_kec REAL,
+    persen_usia_25_44_kec REAL,
+    persen_usia_45_plus_kec REAL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS hasil_prediksi (
     id_prediksi INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_kecamatan INTEGER,
-    tahun INTEGER,
-    tingkat_pendidikan REAL NOT NULL,
-    pendapatan_per_kapita REAL NOT NULL,
-    tingkat_pengangguran REAL NOT NULL,
-    kepadatan_penduduk REAL NOT NULL,
-    ipm REAL NOT NULL,
-    hasil_prediksi REAL NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_kecamatan) REFERENCES kecamatan(id_kecamatan)
+    kecamatan TEXT,
+    kelurahan TEXT,
+    no_tps TEXT,
+    dpt INTEGER,
+    rasio_dpt REAL,
+    usia_17_24 REAL,
+    usia_25_44 REAL,
+    usia_45_plus REAL,
+    hasil_prediksi REAL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS model_evaluasi (
@@ -66,16 +58,15 @@ CREATE TABLE IF NOT EXISTS model_evaluasi (
 
 CREATE VIEW IF NOT EXISTS dataset_final AS
 SELECT
-    se.tahun,
-    k.nama_kecamatan AS kecamatan,
-    se.tingkat_pendidikan,
-    se.pendapatan_per_kapita,
-    se.tingkat_pengangguran,
-    se.kepadatan_penduduk,
-    se.ipm,
-    pp.partisipasi_politik
-FROM data_sosio_ekonomi se
-JOIN kecamatan k ON se.id_kecamatan = k.id_kecamatan
-LEFT JOIN data_partisipasi_politik pp
-    ON pp.id_kecamatan = se.id_kecamatan
-    AND pp.tahun = se.tahun;
+    tahun_pemilu AS tahun,
+    kecamatan,
+    kelurahan,
+    no_tps,
+    dpt,
+    pengguna_hak_pilih,
+    partisipasi_politik,
+    rasio_dpt_terhadap_penduduk_kelurahan,
+    persen_usia_17_24_kec,
+    persen_usia_25_44_kec,
+    persen_usia_45_plus_kec
+FROM data_partisipasi_tps;

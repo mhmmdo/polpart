@@ -33,11 +33,16 @@ def get_summary(df: pd.DataFrame) -> dict:
     average = float(sub[TARGET_COLUMN].mean())
     highest_row = sub.loc[sub[TARGET_COLUMN].idxmax()]
     lowest_row = sub.loc[sub[TARGET_COLUMN].idxmin()]
+    
+    # Format descriptive strings showing TPS level detail
+    highest_area_desc = f"{highest_row['kelurahan']} - TPS {highest_row['no_tps']}"
+    lowest_area_desc = f"{lowest_row['kelurahan']} - TPS {lowest_row['no_tps']}"
+    
     return {
         "rows": len(df),
         "average": average,
-        "highest_area": highest_row["kecamatan"],
+        "highest_area": highest_area_desc,
         "highest_value": float(highest_row[TARGET_COLUMN]),
-        "lowest_area": lowest_row["kecamatan"],
+        "lowest_area": lowest_area_desc,
         "lowest_value": float(lowest_row[TARGET_COLUMN]),
     }

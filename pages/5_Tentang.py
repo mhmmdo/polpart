@@ -14,43 +14,41 @@ st.markdown(
 
 Random Forest adalah metode machine learning berbasis banyak decision tree. Model ini membuat banyak pohon keputusan, lalu menggabungkan hasilnya agar prediksi lebih stabil dibanding satu pohon saja.
 
-Pada aplikasi ini, Random Forest digunakan untuk memprediksi **tingkat partisipasi politik** berdasarkan variabel sosio-ekonomi:
+Pada aplikasi ini, Random Forest digunakan untuk memprediksi **tingkat partisipasi politik** pada tingkat TPS berdasarkan parameter demografi pemilu:
 
-1. Tingkat pendidikan
-2. Pendapatan per kapita
-3. Tingkat pengangguran
-4. Kepadatan penduduk
-5. Indeks Pembangunan Manusia (IPM)
+1. Jumlah Daftar Pemilih Tetap (DPT) TPS
+2. Rasio DPT Terhadap Penduduk Kelurahan
+3. Persentase Pemilih Usia 17 - 24 Tahun (Kecamatan)
+4. Persentase Pemilih Usia 25 - 44 Tahun (Kecamatan)
+5. Persentase Pemilih Usia 45 Tahun Keatas (Kecamatan)
 
 ### Alur Sistem
 
-1. Pengguna membuka aplikasi Streamlit.
-2. Sistem membaca dataset dari **database SQLite (polpart.db)** melalui VIEW `dataset_final`.
-3. Data ditampilkan pada dashboard dan tabel historis.
-4. Pengguna dapat mengunggah CSV melalui sidebar untuk mengimpor/memperbarui data langsung ke database.
-5. Sistem melatih model Random Forest menggunakan data historis dari database secara otomatis saat halaman Prediksi atau Data Historis dibuka.
+1. Pengguna membuka aplikasi Streamlit dan harus melalui halaman **Login / Register**.
+2. Tersedia dua tingkat hak akses (role):
+   - **Operator KPU (Admin)**: Dapat melakukan impor data baru via file CSV di sidebar.
+   - **Masyarakat (User)**: Dapat melihat dashboard, visualisasi, melakukan simulasi prediksi, dan mengunduh laporan PDF.
+3. Sistem membaca dataset dari **database SQLite (polpart.db)** melalui VIEW `dataset_final`.
+4. Data ditampilkan pada dashboard dan tabel historis.
+5. Sistem melatih model Random Forest menggunakan data historis tingkat TPS dari database secara otomatis.
 6. Pengguna mengisi form input variabel pada menu Prediksi.
-7. Sistem menampilkan hasil prediksi partisipasi politik dan **menyimpan riwayat hasil prediksi ke database**.
-8. Sistem menampilkan evaluasi model seperti RMSE, R², dan Feature Importance, serta menyimpan log evaluasi ke database.
-9. Halaman Visualisasi menampilkan heatmap korelasi, grafik tren & perbandingan, serta peta choropleth menggunakan Plotly + GeoJSON yang dicocokkan dengan nama kecamatan dari database.
+7. Sistem menampilkan hasil prediksi partisipasi politik, **menyediakan opsi Unduh Laporan PDF**, dan **menyimpan riwayat hasil prediksi ke database**.
+8. Sistem menampilkan evaluasi model seperti RMSE, R², dan Feature Importance.
+9. Halaman Visualisasi menampilkan heatmap korelasi, grafik tren & perbandingan, serta peta choropleth menggunakan Plotly + GeoJSON.
 
 ### Sumber Data yang Digunakan
 
-- **Socio-Economic & Demography**: Badan Pusat Statistik (BPS) Kota Banjarmasin dan Data Agregat Kependudukan (DAK) Dinas Kependudukan dan Pencatatan Sipil.
-- **Partisipasi Politik**: Komisi Pemilihan Umum (KPU) Kota Banjarmasin.
+- **Socio-Economic & Demography**: Badan Pusat Statistik (BPS) Kota Banjarmasin dan Dinas Kependudukan dan Pencatatan Sipil.
+- **Partisipasi Politik**: Komisi Pemilihan Umum (KPU) Kota Banjarmasin (Data riil 1.838 baris TPS tahun 2024).
 - **Batas Wilayah Geografis**: File GeoJSON kecamatan Banjarmasin (`kecamatan_5.geojson`).
 
 ### Struktur Database SQLite
 
 Database lokal tersimpan di `database/polpart.db` dengan tabel-tabel utama:
 - `kecamatan`: Daftar wilayah administratif kecamatan.
-- `data_sosio_ekonomi`: Data indikator pembangunan dan demografi per kecamatan per tahun.
-- `data_partisipasi_politik`: Data tingkat DPT, pengguna hak pilih, dan persentase partisipasi per kecamatan per tahun.
-- `hasil_prediksi`: Log input formulir dan hasil prediksi model.
+- `pengguna`: Menyimpan username, password (hash SHA-256), dan role (admin/user) untuk autentikasi masuk.
+- `data_partisipasi_tps`: Data tingkat TPS meliputi DPT, pengguna hak pilih, partisipasi, dan rasio kependudukan.
+- `hasil_prediksi`: Log input formulir prediksi dan hasil output model.
 - `model_evaluasi`: Riwayat skor performa model (RMSE, R²).
-
-### Catatan Penting
-
-Dataset bawaan aplikasi ini merupakan data simulasi/template untuk tujuan demonstrasi sistem. Untuk analisis akademik, laporan resmi, atau pengambilan kebijakan, Anda dapat menambahkan data valid melalui fitur **Upload CSV** di sidebar.
 """
 )

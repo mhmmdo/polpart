@@ -24,23 +24,25 @@ YEAR_COLUMN = "tahun"
 AREA_COLUMN = "kecamatan"
 
 FEATURE_COLUMNS = [
-    "tingkat_pendidikan",
-    "pendapatan_per_kapita",
-    "tingkat_pengangguran",
-    "kepadatan_penduduk",
-    "ipm",
+    "dpt",
+    "rasio_dpt_terhadap_penduduk_kelurahan",
+    "persen_usia_17_24_kec",
+    "persen_usia_25_44_kec",
+    "persen_usia_45_plus_kec",
 ]
 
-REQUIRED_COLUMNS = [YEAR_COLUMN, AREA_COLUMN, *FEATURE_COLUMNS, TARGET_COLUMN]
+REQUIRED_COLUMNS = [YEAR_COLUMN, AREA_COLUMN, "kelurahan", "no_tps", *FEATURE_COLUMNS, TARGET_COLUMN]
 
 DISPLAY_NAMES = {
     "tahun": "Tahun",
     "kecamatan": "Kecamatan",
-    "tingkat_pendidikan": "Tingkat Pendidikan (%)",
-    "pendapatan_per_kapita": "Pendapatan per Kapita (Rp)",
-    "tingkat_pengangguran": "Tingkat Pengangguran (%)",
-    "kepadatan_penduduk": "Kepadatan Penduduk",
-    "ipm": "IPM",
+    "kelurahan": "Kelurahan",
+    "no_tps": "No TPS",
+    "dpt": "Jumlah DPT",
+    "rasio_dpt_terhadap_penduduk_kelurahan": "Rasio DPT Kelurahan",
+    "persen_usia_17_24_kec": "Usia 17-24 Tahun (%)",
+    "persen_usia_25_44_kec": "Usia 25-44 Tahun (%)",
+    "persen_usia_45_plus_kec": "Usia 45+ Tahun (%)",
     "partisipasi_politik": "Partisipasi Politik (%)",
 }
 

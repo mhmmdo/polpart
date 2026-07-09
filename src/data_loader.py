@@ -32,7 +32,7 @@ def validate_columns(df: pd.DataFrame, required_columns: Iterable[str] = REQUIRE
 def coerce_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
     clean = df.copy()
     for column in clean.columns:
-        if column != "kecamatan":
+        if column not in ["kecamatan", "kelurahan", "no_tps", "id_record", "jenis_kelamin", "penduduk_total_kelurahan"]:
             clean[column] = pd.to_numeric(clean[column], errors="coerce")
     return clean
 
@@ -53,11 +53,11 @@ def get_training_dataset() -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame()
     cols = [
-        "tingkat_pendidikan",
-        "pendapatan_per_kapita",
-        "tingkat_pengangguran",
-        "kepadatan_penduduk",
-        "ipm",
+        "dpt",
+        "rasio_dpt_terhadap_penduduk_kelurahan",
+        "persen_usia_17_24_kec",
+        "persen_usia_25_44_kec",
+        "persen_usia_45_plus_kec",
         "partisipasi_politik"
     ]
     return df.dropna(subset=cols).reset_index(drop=True)

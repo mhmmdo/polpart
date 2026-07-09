@@ -9,7 +9,7 @@ import sys
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT_DIR))
 
-from src.database import init_database, seed_kecamatan
+from src.database import init_database, seed_kecamatan, seed_admin
 from src.config import DB_PATH
 
 def main():
@@ -22,6 +22,13 @@ def main():
         seed_kecamatan()
         print("Seeding data kecamatan default selesai.")
 
+        seed_admin()
+        print("Seeding akun Admin/User default selesai.")
+        
+        print("Mengimpor data TPS dari CSV...")
+        from scripts.import_tps_csv import main as import_tps_data
+        import_tps_data()
+        
         print("Database berhasil dibuat di:", DB_PATH)
         print("Inisialisasi selesai dengan sukses!")
     except Exception as e:

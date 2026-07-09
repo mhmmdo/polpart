@@ -29,18 +29,22 @@ else:
     if filtered_df.empty:
         st.warning("Data kosong setelah filter.")
     else:
-        # Menambahkan fitur kolom pencarian (search bar) berdasarkan nama kecamatan
-        keyword = st.text_input("Cari kecamatan", placeholder="Contoh: Banjarmasin Timur")
+        # Menambahkan fitur kolom pencarian (search bar) berdasarkan nama kecamatan, kelurahan, atau TPS
+        keyword = st.text_input("Cari data (kecamatan / kelurahan / nomor TPS)", placeholder="Contoh: BASIRIH atau 001")
         if keyword:
-            filtered_df = filtered_df[filtered_df["kecamatan"].str.contains(keyword, case=False, na=False)]
+            filtered_df = filtered_df[
+                filtered_df["kecamatan"].str.contains(keyword, case=False, na=False) |
+                filtered_df["kelurahan"].str.contains(keyword, case=False, na=False) |
+                filtered_df["no_tps"].astype(str).str.contains(keyword, case=False, na=False)
+            ]
 
-        st.markdown("### Tabel Data")
+        st.markdown("### Tabel Data TPS")
         # Menggambar tabel di layar web dengan nama kolom yang sudah dipercantik (rename_for_display)
-        st.dataframe(rename_for_display(filtered_df), width="stretch", hide_index=True)
+        st.dataframe(rename_for_display(filtered_df), use_container_width=True, hide_index=True)
 
         # Menyiapkan file untuk didownload pengguna menjadi format CSV
         csv = filtered_df.to_csv(index=False).encode("utf-8")
-        st.download_button("Download data hasil filter", data=csv, file_name="data_hasil_filter.csv", mime="text/csv")
+        st.download_button("Download data hasil filter", data=csv, file_name="data_hasil_filter.csv", mime="text/csv", use_container_width=True)
 
         st.markdown("---")
         st.markdown("### Evaluasi Model Random Forest")
@@ -50,23 +54,19 @@ else:
             
             # Menampilkan metrik akurasi (RMSE, R2) ke dalam 4 kolom
             col1, col2, col3, col4 = st.columns(4)
-            col1.metric("RMSE", f"{model_result.rmse:.3f}") # Root Mean Square Error (makin kecil makin bagus)
-            col2.metric("R²", f"{model_result.r2:.3f}") # R-squared (mendekati 1 makin bagus)
-            col3.metric("Data Training", model_result.train_size) # Jumlah data untuk belajar
-            col4.metric("Data Testing", model_result.test_size) # Jumlah data untuk ujian
+            col1.metric("RMSE", f"{model_result.rmse:.4f}")
+            col2.metric("R² Score", f"{model_result.r2:.4f} ({model_result.r2*100:.1f}%)")
+            col3.metric("Data Training", model_result.train_size)
+            col4.metric("Data Testing", model_result.test_size)
             
             # Membagi area grafik menjadi kiri dan kanan
             left, right = st.columns(2)
             with left:
-                # Menampilkan grafik batang mengenai fitur apa saja yang paling penting
-                st.plotly_chart(feature_importance_bar(model_result.feature_importance), width="stretch")
+                st.plotly_chart(feature_importance_bar(model_result.feature_importance), use_container_width=True, theme=None)
             with right:
-                # Menampilkan grafik scatter plot perbandingan tebakan mesin vs kunci jawaban
-                st.plotly_chart(prediction_scatter(model_result.prediction_result), width="stretch")
+                st.plotly_chart(prediction_scatter(model_result.prediction_result), use_container_width=True, theme=None)
 
             st.markdown("#### Hasil Aktual vs Prediksi")
-            # Menampilkan tabel detail tebakan mesin satu per satu
-            st.dataframe(model_result.prediction_result, width="stretch", hide_index=True)
+            st.dataframe(model_result.prediction_result, use_container_width=True, hide_index=True)
         except ValueError as error:
-            # Jika jumlah data terlalu sedikit untuk belajar, akan muncul peringatan ini
             st.warning(str(error))
