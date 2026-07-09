@@ -79,7 +79,6 @@ if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
                 reg_user = st.text_input("Username Baru", key="reg_username")
                 reg_pass = st.text_input("Password Baru", type="password", key="reg_password")
                 reg_pass_conf = st.text_input("Konfirmasi Password", type="password", key="reg_password_conf")
-                reg_role = st.selectbox("Role", ["user", "admin"], format_func=lambda x: "Masyarakat (User)" if x == "user" else "Operator/KPU (Admin)", key="reg_role")
                 submit_reg = st.form_submit_button("Daftar Sekarang", use_container_width=True)
                 if submit_reg:
                     if not reg_user.strip() or not reg_pass.strip():
@@ -88,7 +87,8 @@ if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
                         st.error("Konfirmasi password tidak cocok.")
                     else:
                         from src.database import register_user
-                        if register_user(reg_user, reg_pass, reg_role):
+                        # Semua pendaftaran baru otomatis mendapatkan peran 'user' (Masyarakat)
+                        if register_user(reg_user, reg_pass, "user"):
                             st.success("Registrasi berhasil! Silakan masuk di tab Login.")
                         else:
                             st.error("Username sudah terdaftar. Silakan pilih username lain.")
