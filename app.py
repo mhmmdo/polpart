@@ -17,6 +17,13 @@ st.set_page_config(
 if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
     st.html("""
         <style>
+        /* Sembunyikan sidebar sepenuhnya saat belum login */
+        [data-testid="stSidebar"] {
+            display: none !important;
+        }
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
         .stApp {
             background-color: #eaf8f8 !important;
         }
@@ -26,7 +33,7 @@ if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             max-width: 450px;
-            margin: 50px auto 0 auto;
+            margin: 80px auto 0 auto;
             border-top: 5px solid #ff7f66;
         }
         .login-title {
@@ -45,9 +52,9 @@ if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
     col_l, col_c, col_r = st.columns([1, 2, 1])
     with col_c:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        st.markdown('<h2 class="login-title">🔑 Masuk PolPart RF</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="login-title">Masuk PolPart RF</h2>', unsafe_allow_html=True)
         
-        tab_login, tab_register = st.tabs(["🔑 Masuk (Login)", "📝 Daftar (Register)"])
+        tab_login, tab_register = st.tabs(["Masuk", "Daftar Akun"])
         
         with tab_login:
             with st.form("login_form_main"):
@@ -56,7 +63,7 @@ if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
                 submit_login = st.form_submit_button("Masuk", use_container_width=True)
                 if submit_login:
                     from src.database import check_login, seed_admin
-                    seed_admin() # Pastikan user bawaan terbuat jika database baru
+                    seed_admin()
                     res = check_login(user_val, pass_val)
                     if res:
                         st.session_state["logged_in"] = True
@@ -150,7 +157,7 @@ with st.sidebar:
     )
     
     st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("🚪 Keluar (Logout)", use_container_width=True, key="logout_btn_main"):
+    if st.button("Keluar (Logout)", use_container_width=True, key="logout_btn_main"):
         st.session_state["logged_in"] = False
         st.session_state["username"] = None
         st.session_state["role"] = None

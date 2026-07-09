@@ -126,7 +126,7 @@ if submit:
         pdf_bytes = generate_recap_pdf(pdf_data)
         
         st.download_button(
-            label="📥 Unduh Rekap PDF Laporan",
+            label="Unduh Rekap PDF Laporan",
             data=pdf_bytes,
             file_name=f"rekap_prediksi_{kelurahan_val.strip().replace(' ', '_')}_tps{no_tps_val}.pdf",
             mime="application/pdf",
