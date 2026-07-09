@@ -95,7 +95,10 @@ def get_summary_2024(df: pd.DataFrame) -> dict:
         }
     
     # Calculate unique TPS count
-    total_tps = int(df["no_tps"].nunique()) if "no_tps" in df.columns else len(df)
+    if all(c in df.columns for c in ["kecamatan", "kelurahan", "no_tps"]):
+        total_tps = int(df[["kecamatan", "kelurahan", "no_tps"]].drop_duplicates().shape[0])
+    else:
+        total_tps = len(df)
     total_dpt = int(df["dpt"].sum())
     total_pengguna = int(df["pengguna_hak_pilih"].sum())
     avg_part = (total_pengguna / total_dpt * 100.0) if total_dpt > 0 else 0.0
