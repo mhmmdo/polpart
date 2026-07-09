@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.model_selection import train_test_split
 
 from src.config import FEATURE_COLUMNS, MODEL_PARAMS, TARGET_COLUMN
@@ -14,6 +14,7 @@ class ModelResult:
     # Kelas penyimpan data (blueprint) untuk menampung seluruh hasil dari model setelah belajar
     model: RandomForestRegressor
     rmse: float
+    mae: float
     r2: float
     feature_importance: pd.DataFrame
     prediction_result: pd.DataFrame
@@ -24,6 +25,12 @@ class ModelResult:
 def train_random_forest(df: pd.DataFrame) -> ModelResult:
     """Fungsi utama untuk melatih algoritma Random Forest menggunakan data yang diberikan."""
     
+    # Memastikan hanya melatih menggunakan data pemilu tahun 2024
+    if "tahun" in df.columns:
+        df = df[df["tahun"] == 2024]
+    elif "tahun_pemilu" in df.columns:
+        df = df[df["tahun_pemilu"] == 2024]
+        
     # 1. Menghapus baris data yang kosong (NaN) pada kolom Fitur (Soal) dan Target (Kunci Jawaban)
     data = df.dropna(subset=[*FEATURE_COLUMNS, TARGET_COLUMN]).copy()
 
@@ -57,10 +64,12 @@ def train_random_forest(df: pd.DataFrame) -> ModelResult:
     # 7. Evaluasi (Menghitung Nilai Raport Model)
     # RMSE = Root Mean Squared Error (Seberapa besar simpangan/error dari tebakan, makin kecil makin bagus)
     rmse = float(np.sqrt(mean_squared_error(y_test, y_pred)))
+    # MAE = Mean Absolute Error
+    mae = float(mean_absolute_error(y_test, y_pred))
     # R2 Score = Persentase kesesuaian prediksi dengan data asli (Sempurna jika nilainya 1.0)
     r2 = float(r2_score(y_test, y_pred)) if len(y_test) > 1 else 0.0
 
-    # 8. Mengecek faktor/fitur mana (misal IPM, Pendidikan) yang paling berpengaruh pada partisipasi
+    # 8. Mengecek faktor/fitur mana (misal IPM, Kepadatan) yang paling berpengaruh pada partisipasi
     importance = pd.DataFrame(
         {
             "variabel": FEATURE_COLUMNS,
@@ -77,12 +86,13 @@ def train_random_forest(df: pd.DataFrame) -> ModelResult:
         }
     )
 
-    # 10. Menyimpan nilai raport model (RMSE, R2) ke dalam database secara otomatis
+    # 10. Menyimpan nilai raport model (RMSE, MAE, R2) ke dalam database secara otomatis
     try:
         from src.database import save_model_evaluation
         save_model_evaluation({
             "nama_model": "Random Forest",
             "rmse": rmse,
+            "mae": mae,
             "r2_score": r2,
             "jumlah_data": len(data),
             "jumlah_training": len(x_train),
@@ -97,6 +107,7 @@ def train_random_forest(df: pd.DataFrame) -> ModelResult:
     return ModelResult(
         model=model,
         rmse=rmse,
+        mae=mae,
         r2=r2,
         feature_importance=importance,
         prediction_result=prediction_result,

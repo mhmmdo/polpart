@@ -14,21 +14,42 @@ CREATE TABLE IF NOT EXISTS pengguna (
 CREATE TABLE IF NOT EXISTS data_partisipasi_tps (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tahun_pemilu INTEGER NOT NULL,
+    level_data TEXT DEFAULT 'tps',
     kecamatan TEXT NOT NULL,
     kelurahan TEXT NOT NULL,
     no_tps TEXT NOT NULL,
     id_record TEXT,
-    jenis_kelamin TEXT,
     dpt INTEGER,
     pengguna_hak_pilih INTEGER,
     partisipasi_politik REAL,
     dpt_total_tps INTEGER,
     penduduk_total_kelurahan TEXT,
+    penduduk_total_kecamatan INTEGER,
     rasio_dpt_terhadap_penduduk_kelurahan REAL,
+    pendapatan_per_kapita REAL,
+    tingkat_pengangguran REAL,
+    kepadatan_penduduk REAL,
+    ipm REAL,
+    jumlah_usia_17_24_kec INTEGER,
+    jumlah_usia_25_44_kec INTEGER,
+    jumlah_usia_45_plus_kec INTEGER,
     persen_usia_17_24_kec REAL,
     persen_usia_25_44_kec REAL,
     persen_usia_45_plus_kec REAL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS data_partisipasi_agregat (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tahun_pemilu INTEGER,
+    level_data TEXT DEFAULT 'agregat',
+    dapil TEXT,
+    kecamatan TEXT,
+    dpt_total INTEGER,
+    pengguna_total INTEGER,
+    partisipasi_politik REAL,
+    sumber_data TEXT,
+    catatan TEXT
 );
 
 CREATE TABLE IF NOT EXISTS hasil_prediksi (
@@ -37,10 +58,14 @@ CREATE TABLE IF NOT EXISTS hasil_prediksi (
     kelurahan TEXT,
     no_tps TEXT,
     dpt INTEGER,
-    rasio_dpt REAL,
-    usia_17_24 REAL,
-    usia_25_44 REAL,
-    usia_45_plus REAL,
+    rasio_dpt_terhadap_penduduk_kelurahan REAL,
+    pendapatan_per_kapita REAL,
+    tingkat_pengangguran REAL,
+    kepadatan_penduduk REAL,
+    ipm REAL,
+    persen_usia_17_24_kec REAL,
+    persen_usia_25_44_kec REAL,
+    persen_usia_45_plus_kec REAL,
     hasil_prediksi REAL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -49,6 +74,7 @@ CREATE TABLE IF NOT EXISTS model_evaluasi (
     id_evaluasi INTEGER PRIMARY KEY AUTOINCREMENT,
     nama_model TEXT NOT NULL,
     rmse REAL,
+    mae REAL,
     r2_score REAL,
     jumlah_data INTEGER,
     jumlah_training INTEGER,
@@ -56,7 +82,8 @@ CREATE TABLE IF NOT EXISTS model_evaluasi (
     tanggal_evaluasi TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE VIEW IF NOT EXISTS dataset_final AS
+DROP VIEW IF EXISTS dataset_final;
+CREATE VIEW dataset_final AS
 SELECT
     tahun_pemilu AS tahun,
     kecamatan,
@@ -66,7 +93,12 @@ SELECT
     pengguna_hak_pilih,
     partisipasi_politik,
     rasio_dpt_terhadap_penduduk_kelurahan,
+    pendapatan_per_kapita,
+    tingkat_pengangguran,
+    kepadatan_penduduk,
+    ipm,
     persen_usia_17_24_kec,
     persen_usia_25_44_kec,
     persen_usia_45_plus_kec
-FROM data_partisipasi_tps;
+FROM data_partisipasi_tps
+WHERE tahun_pemilu = 2024;

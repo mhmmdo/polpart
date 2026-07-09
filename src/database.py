@@ -84,9 +84,11 @@ def get_tps_data() -> pd.DataFrame:
     with get_connection() as conn:
         return pd.read_sql_query("""
             SELECT 
-                id, tahun_pemilu, kecamatan, kelurahan, no_tps, id_record, jenis_kelamin,
+                id, tahun_pemilu, level_data, kecamatan, kelurahan, no_tps, id_record,
                 dpt, pengguna_hak_pilih, partisipasi_politik, dpt_total_tps,
-                penduduk_total_kelurahan, rasio_dpt_terhadap_penduduk_kelurahan,
+                penduduk_total_kelurahan, penduduk_total_kecamatan, rasio_dpt_terhadap_penduduk_kelurahan,
+                pendapatan_per_kapita, tingkat_pengangguran, kepadatan_penduduk, ipm,
+                jumlah_usia_17_24_kec, jumlah_usia_25_44_kec, jumlah_usia_45_plus_kec,
                 persen_usia_17_24_kec, persen_usia_25_44_kec, persen_usia_45_plus_kec,
                 created_at
             FROM data_partisipasi_tps
@@ -107,29 +109,70 @@ def insert_or_update_tps_data(data: dict):
             
         cursor.execute("""
             INSERT INTO data_partisipasi_tps (
-                tahun_pemilu, kecamatan, kelurahan, no_tps, id_record, jenis_kelamin,
+                tahun_pemilu, level_data, kecamatan, kelurahan, no_tps, id_record,
                 dpt, pengguna_hak_pilih, partisipasi_politik, dpt_total_tps,
-                penduduk_total_kelurahan, rasio_dpt_terhadap_penduduk_kelurahan,
+                penduduk_total_kelurahan, penduduk_total_kecamatan, rasio_dpt_terhadap_penduduk_kelurahan,
+                pendapatan_per_kapita, tingkat_pengangguran, kepadatan_penduduk, ipm,
+                jumlah_usia_17_24_kec, jumlah_usia_25_44_kec, jumlah_usia_45_plus_kec,
                 persen_usia_17_24_kec, persen_usia_25_44_kec, persen_usia_45_plus_kec
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data.get('tahun_pemilu'),
+            data.get('level_data', 'tps'),
             data.get('kecamatan', '').strip().upper(),
             data.get('kelurahan', '').strip().upper(),
             data.get('no_tps', '').strip(),
             data.get('id_record'),
-            data.get('jenis_kelamin', 'JML'),
             dpt,
             pilih,
             partisipasi,
             data.get('dpt_total_tps'),
             data.get('penduduk_total_kelurahan'),
+            data.get('penduduk_total_kecamatan'),
             data.get('rasio_dpt_terhadap_penduduk_kelurahan'),
+            data.get('pendapatan_per_kapita'),
+            data.get('tingkat_pengangguran'),
+            data.get('kepadatan_penduduk'),
+            data.get('ipm'),
+            data.get('jumlah_usia_17_24_kec'),
+            data.get('jumlah_usia_25_44_kec'),
+            data.get('jumlah_usia_45_plus_kec'),
             data.get('persen_usia_17_24_kec'),
             data.get('persen_usia_25_44_kec'),
             data.get('persen_usia_45_plus_kec')
         ))
         conn.commit()
+
+def insert_data_agregat(data: dict):
+    """Inserts a record into data_partisipasi_agregat."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO data_partisipasi_agregat (
+                tahun_pemilu, level_data, dapil, kecamatan, dpt_total,
+                pengguna_total, partisipasi_politik, sumber_data, catatan
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('tahun_pemilu'),
+            data.get('level_data', 'agregat'),
+            data.get('dapil'),
+            data.get('kecamatan', '').strip().upper(),
+            data.get('dpt_total'),
+            data.get('pengguna_total'),
+            data.get('partisipasi_politik'),
+            data.get('sumber_data'),
+            data.get('catatan')
+        ))
+        conn.commit()
+
+def get_dataset_2019_agregat() -> pd.DataFrame:
+    """Retrieves all 2019 aggregated records from database."""
+    with get_connection() as conn:
+        return pd.read_sql_query("""
+            SELECT * FROM data_partisipasi_agregat
+            WHERE tahun_pemilu = 2019
+            ORDER BY kecamatan ASC
+        """, conn)
 
 def delete_tps_data(id_tps: int):
     """Deletes a TPS record by ID."""
@@ -144,18 +187,24 @@ def save_prediction(data: dict):
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO hasil_prediksi (
-                kecamatan, kelurahan, no_tps, dpt, rasio_dpt,
-                usia_17_24, usia_25_44, usia_45_plus, hasil_prediksi, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                kecamatan, kelurahan, no_tps, dpt, rasio_dpt_terhadap_penduduk_kelurahan,
+                pendapatan_per_kapita, tingkat_pengangguran, kepadatan_penduduk, ipm,
+                persen_usia_17_24_kec, persen_usia_25_44_kec, persen_usia_45_plus_kec,
+                hasil_prediksi, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         """, (
             data.get('kecamatan'),
             data.get('kelurahan'),
             data.get('no_tps'),
             data.get('dpt'),
-            data.get('rasio_dpt'),
-            data.get('usia_17_24'),
-            data.get('usia_25_44'),
-            data.get('usia_45_plus'),
+            data.get('rasio_dpt_terhadap_penduduk_kelurahan'),
+            data.get('pendapatan_per_kapita'),
+            data.get('tingkat_pengangguran'),
+            data.get('kepadatan_penduduk'),
+            data.get('ipm'),
+            data.get('persen_usia_17_24_kec'),
+            data.get('persen_usia_25_44_kec'),
+            data.get('persen_usia_45_plus_kec'),
             data.get('hasil_prediksi')
         ))
         conn.commit()
@@ -165,8 +214,10 @@ def get_prediction_history() -> pd.DataFrame:
     with get_connection() as conn:
         return pd.read_sql_query("""
             SELECT 
-                id_prediksi, kecamatan, kelurahan, no_tps, dpt, rasio_dpt,
-                usia_17_24, usia_25_44, usia_45_plus, hasil_prediksi, created_at
+                id_prediksi, kecamatan, kelurahan, no_tps, dpt, rasio_dpt_terhadap_penduduk_kelurahan,
+                pendapatan_per_kapita, tingkat_pengangguran, kepadatan_penduduk, ipm,
+                persen_usia_17_24_kec, persen_usia_25_44_kec, persen_usia_45_plus_kec,
+                hasil_prediksi, created_at
             FROM hasil_prediksi
             ORDER BY created_at DESC
         """, conn)
@@ -177,11 +228,12 @@ def save_model_evaluation(data: dict):
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO model_evaluasi (
-                nama_model, rmse, r2_score, jumlah_data, jumlah_training, jumlah_testing
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                nama_model, rmse, mae, r2_score, jumlah_data, jumlah_training, jumlah_testing
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             data['nama_model'],
             data.get('rmse'),
+            data.get('mae'),
             data.get('r2_score'),
             data.get('jumlah_data'),
             data.get('jumlah_training'),

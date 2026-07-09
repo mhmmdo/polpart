@@ -44,17 +44,26 @@ if not has_partisipasi:
     with col2:
         st.html(custom_metric_card("RATA-RATA PARTISIPASI", "N/A", "", "Data belum tersedia", "down"))
 else:
-    # Mengambil ringkasan statistik (seperti rata-rata, nilai tertinggi/terendah)
-    summary = get_summary(filtered_df)
+    # Mengambil ringkasan statistik tingkat TPS 2024
+    from src.data_loader import get_summary_2024
+    summary_2024 = get_summary_2024(filtered_df)
+    
     col1, col2, col3, col4 = st.columns(4) # Membagi layar menjadi 4 kolom untuk menampilkan metrik (kartu angka)
     with col1:
-        st.html(custom_metric_card("JUMLAH DATA", str(summary["rows"]), "", "Data Demografi & Pemilu", "neutral"))
+        st.html(custom_metric_card("TOTAL TPS", f"{summary_2024['total_tps']:,}".replace(",", "."), "", "Jumlah TPS Terdaftar", "neutral"))
     with col2:
-        st.html(custom_metric_card("RATA-RATA PARTISIPASI", format_percent(summary["average"]), "", "+2.5% dibanding target KPU", "up"))
+        st.html(custom_metric_card("TOTAL DPT", f"{summary_2024['total_dpt']:,}".replace(",", "."), "", "Daftar Pemilih Tetap", "neutral"))
     with col3:
-        st.html(custom_metric_card("PARTISIPASI TERTINGGI", f"{summary['highest_value']:.1f}%", "", summary['highest_area'], "up"))
+        st.html(custom_metric_card("PENGGUNA HAK PILIH", f"{summary_2024['total_pengguna']:,}".replace(",", "."), "", "Jumlah Pemilih Hadir", "neutral"))
     with col4:
-        st.html(custom_metric_card("PARTISIPASI TERENDAH", f"{summary['lowest_value']:.1f}%", "", summary['lowest_area'], "down"))
+        st.html(custom_metric_card("RATA-RATA PARTISIPASI", format_percent(summary_2024["average_partisipasi"]), "", "Rata-rata 2024", "up"))
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_t1, col_t2 = st.columns(2)
+    with col_t1:
+        st.html(custom_metric_card("PARTISIPASI TERTINGGI (TPS)", f"{summary_2024['highest_value']:.2f}%", "", summary_2024['highest_area'], "up"))
+    with col_t2:
+        st.html(custom_metric_card("PARTISIPASI TERENDAH (TPS)", f"{summary_2024['lowest_value']:.2f}%", "", summary_2024['lowest_area'], "down"))
 
     st.markdown("---") # Membuat garis pemisah
     
@@ -65,12 +74,16 @@ else:
     with col_left:
         st.plotly_chart(participation_by_area(chart_df), use_container_width=True, theme=None)
     with col_right:
-        st.plotly_chart(participation_trend(chart_df), use_container_width=True, theme=None)
+        # Menggambar grafik perbandingan partisipasi 2019 vs 2024
+        from src.data_loader import get_comparison_2019_2024
+        from src.visualizations import participation_comparison_chart
+        comp_df = get_comparison_2019_2024()
+        st.plotly_chart(participation_comparison_chart(comp_df), use_container_width=True, theme=None)
 
 st.markdown("---") # Membuat garis pemisah
 st.markdown("### Statistik Sederhana")
 # Menampilkan tabel statistik dasar (rata-rata, min, max) dari seluruh data yang berupa angka
 st.dataframe(
     filtered_df.select_dtypes(include='number').describe().T,
-    width="stretch",
+    use_container_width=True,
 )

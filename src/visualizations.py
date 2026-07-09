@@ -130,3 +130,39 @@ def participation_map(df: pd.DataFrame, geojson: dict, selected_year: int):
     )
     fig.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
     return fig
+
+
+def participation_comparison_chart(comp_df: pd.DataFrame):
+    """Draws a grouped bar chart comparing 2019 vs 2024 participation rates."""
+    if comp_df.empty:
+        return px.scatter(title="Data Perbandingan Tidak Tersedia")
+        
+    # Melt dataframe for easy plotting with px.bar
+    melted = comp_df.melt(
+        id_vars=["kecamatan"],
+        value_vars=["partisipasi_2019", "partisipasi_2024"],
+        var_name="Tahun",
+        value_name="Partisipasi"
+    )
+    melted["Tahun"] = melted["Tahun"].map({
+        "partisipasi_2019": "2019 (Agregat)",
+        "partisipasi_2024": "2024 (TPS Agg)"
+    })
+    
+    fig = px.bar(
+        melted,
+        x="kecamatan",
+        y="Partisipasi",
+        color="Tahun",
+        barmode="group",
+        text="Partisipasi",
+        title="Perbandingan Partisipasi Politik Per Kecamatan (2019 vs 2024)",
+        template="plotly_white",
+        color_discrete_map={
+            "2019 (Agregat)": "#94A3B8", # Slate/Gray
+            "2024 (TPS Agg)": "#ff7f66"   # Coral
+        }
+    )
+    fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+    fig.update_layout(yaxis_ticksuffix="%", xaxis_title="", yaxis_title="Partisipasi Politik (%)")
+    return fig

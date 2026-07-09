@@ -9,7 +9,8 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 
 # Path untuk data, model, database, dan aset
 DATA_DIR = BASE_DIR / "data"
-RAW_DATA_PATH = DATA_DIR / "raw" / "data_partisipasi_politik_sample.csv"
+DATA_2024_PATH = DATA_DIR / "raw" / "dataset_2024_tps_model_final.csv"
+DATA_2019_PATH = DATA_DIR / "raw" / "dataset_2019_agregat_historis.csv"
 GEOJSON_PATH = DATA_DIR / "geo" / "kecamatan_5.geojson"
 MODEL_DIR = BASE_DIR / "models"
 DB_PATH = BASE_DIR / "database" / "polpart.db"
@@ -26,6 +27,10 @@ AREA_COLUMN = "kecamatan"
 FEATURE_COLUMNS = [
     "dpt",
     "rasio_dpt_terhadap_penduduk_kelurahan",
+    "pendapatan_per_kapita",
+    "tingkat_pengangguran",
+    "kepadatan_penduduk",
+    "ipm",
     "persen_usia_17_24_kec",
     "persen_usia_25_44_kec",
     "persen_usia_45_plus_kec",
@@ -40,6 +45,10 @@ DISPLAY_NAMES = {
     "no_tps": "No TPS",
     "dpt": "Jumlah DPT",
     "rasio_dpt_terhadap_penduduk_kelurahan": "Rasio DPT Kelurahan",
+    "pendapatan_per_kapita": "Pendapatan Per Kapita",
+    "tingkat_pengangguran": "Tingkat Pengangguran (%)",
+    "kepadatan_penduduk": "Kepadatan Penduduk (jiwa/km²)",
+    "ipm": "IPM",
     "persen_usia_17_24_kec": "Usia 17-24 Tahun (%)",
     "persen_usia_25_44_kec": "Usia 25-44 Tahun (%)",
     "persen_usia_45_plus_kec": "Usia 45+ Tahun (%)",

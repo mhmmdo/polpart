@@ -16,6 +16,13 @@ def main():
     """Fungsi utama untuk menjalankan proses inisialisasi database."""
     print("Inisialisasi database...")
     try:
+        if DB_PATH.exists():
+            print(f"Menghapus database lama di {DB_PATH}...")
+            try:
+                DB_PATH.unlink()
+            except Exception as unlink_err:
+                print(f"Peringatan: Gagal menghapus database lama: {unlink_err}")
+                
         init_database()
         print("Skema database berhasil diterapkan.")
 

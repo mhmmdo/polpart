@@ -99,6 +99,18 @@ def generate_recap_pdf(data: dict) -> bytes:
     pdf.cell(100, 8, " Rasio DPT Terhadap Penduduk Kelurahan", border=1, align="L")
     pdf.cell(90, 8, f" {data.get('rasio_dpt', 0.0):.4f}", border=1, align="C", ln=True)
     
+    pdf.cell(100, 8, " Pendapatan Per Kapita (Rp)", border=1, align="L")
+    pdf.cell(90, 8, f" Rp {data.get('pendapatan_per_kapita', 0.0):,}".replace(",", "."), border=1, align="C", ln=True)
+    
+    pdf.cell(100, 8, " Tingkat Pengangguran Kecamatan (%)", border=1, align="L")
+    pdf.cell(90, 8, f" {data.get('tingkat_pengangguran', 0.0):.2f}%", border=1, align="C", ln=True)
+    
+    pdf.cell(100, 8, " Kepadatan Penduduk (jiwa/km²)", border=1, align="L")
+    pdf.cell(90, 8, f" {data.get('kepadatan_penduduk', 0.0):.2f}", border=1, align="C", ln=True)
+    
+    pdf.cell(100, 8, " Indeks Pembangunan Manusia (IPM)", border=1, align="L")
+    pdf.cell(90, 8, f" {data.get('ipm', 0.0):.2f}", border=1, align="C", ln=True)
+    
     pdf.cell(100, 8, " Persentase Pemilih Usia 17 - 24 Tahun (Kecamatan)", border=1, align="L")
     pdf.cell(90, 8, f" {data.get('usia_17_24', 0.0):.2f}%", border=1, align="C", ln=True)
     
@@ -135,6 +147,7 @@ def generate_recap_pdf(data: dict) -> bytes:
     metrics = data.get("model_metrics", {})
     r2 = metrics.get("r2", 0.0)
     rmse = metrics.get("rmse", 0.0)
+    mae = metrics.get("mae", 0.0)
     
     # Draw a clean, borderless metric block
     pdf.set_fill_color(248, 250, 252) # Soft light slate background
@@ -144,8 +157,9 @@ def generate_recap_pdf(data: dict) -> bytes:
     pdf.set_font("helvetica", "B", 10)
     pdf.set_text_color(71, 85, 105)
     
-    pdf.cell(95, 8, f"   Koefisien Determinasi (R2 Score) :  {r2:.4f} ({r2*100:.1f}%)", ln=False)
-    pdf.cell(95, 8, f"   Root Mean Squared Error (RMSE) :  {rmse:.4f}", ln=True)
+    pdf.cell(63, 8, f"   R2 Score :  {r2:.4f} ({r2*100:.1f}%)", ln=False)
+    pdf.cell(63, 8, f"   RMSE :  {rmse:.4f}", ln=False)
+    pdf.cell(64, 8, f"   MAE :  {mae:.4f}", ln=True)
     
     pdf.ln(6)
     pdf.set_font("helvetica", "I", 8)

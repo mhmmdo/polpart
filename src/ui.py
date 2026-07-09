@@ -137,7 +137,20 @@ def load_data_from_sidebar():
                             else:
                                 penduduk_kel = str(penduduk_kel).strip()
                                 
+                            pend_kec = clean_int(row.get("penduduk_total_kecamatan"))
                             rasio_dpt = clean_float(row.get("rasio_dpt_terhadap_penduduk_kelurahan"))
+                            
+                            # Socio-economic columns
+                            pendapatan = clean_float(row.get("pendapatan_per_kapita"))
+                            pengangguran = clean_float(row.get("tingkat_pengangguran"))
+                            kepadatan = clean_float(row.get("kepadatan_penduduk"))
+                            ipm = clean_float(row.get("ipm"))
+                            
+                            # Age distributions
+                            j_usia_17_24 = clean_int(row.get("jumlah_usia_17_24_kec"))
+                            j_usia_25_44 = clean_int(row.get("jumlah_usia_25_44_kec"))
+                            j_usia_45_plus = clean_int(row.get("jumlah_usia_45_plus_kec"))
+                            
                             u17_24 = clean_float(row.get("persen_usia_17_24_kec"))
                             u25_44 = clean_float(row.get("persen_usia_25_44_kec"))
                             u45_plus = clean_float(row.get("persen_usia_45_plus_kec"))
@@ -145,24 +158,34 @@ def load_data_from_sidebar():
                             try:
                                 cursor.execute("""
                                     INSERT INTO data_partisipasi_tps (
-                                        tahun_pemilu, kecamatan, kelurahan, no_tps, id_record, jenis_kelamin,
+                                        tahun_pemilu, level_data, kecamatan, kelurahan, no_tps, id_record,
                                         dpt, pengguna_hak_pilih, partisipasi_politik, dpt_total_tps,
-                                        penduduk_total_kelurahan, rasio_dpt_terhadap_penduduk_kelurahan,
+                                        penduduk_total_kelurahan, penduduk_total_kecamatan, rasio_dpt_terhadap_penduduk_kelurahan,
+                                        pendapatan_per_kapita, tingkat_pengangguran, kepadatan_penduduk, ipm,
+                                        jumlah_usia_17_24_kec, jumlah_usia_25_44_kec, jumlah_usia_45_plus_kec,
                                         persen_usia_17_24_kec, persen_usia_25_44_kec, persen_usia_45_plus_kec
-                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                 """, (
                                     int(tahun),
+                                    'tps',
                                     str(kec).strip().upper(),
                                     str(kel).strip().upper(),
                                     str(tps).strip(),
                                     row.get("id_record"),
-                                    row.get("jenis_kelamin"),
                                     dpt,
                                     pilih,
                                     partisipasi,
                                     dpt_total,
                                     penduduk_kel,
+                                    pend_kec,
                                     rasio_dpt,
+                                    pendapatan,
+                                    pengangguran,
+                                    kepadatan,
+                                    ipm,
+                                    j_usia_17_24,
+                                    j_usia_25_44,
+                                    j_usia_45_plus,
                                     u17_24,
                                     u25_44,
                                     u45_plus

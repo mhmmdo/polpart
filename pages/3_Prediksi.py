@@ -7,8 +7,7 @@ from src.ui import load_data_from_sidebar, render_header, setup_page
 from src.database import (
     get_all_kecamatan,
     save_prediction,
-    get_prediction_history,
-    get_connection
+    get_prediction_history
 )
 from src.pdf_generator import generate_recap_pdf
 
@@ -28,11 +27,12 @@ except ValueError as error:
     st.error(str(error))
     st.stop()
 
-# Menampilkan metrik model
-col1, col2, col3 = st.columns(3)
+# Menampilkan metrik model (RMSE, MAE, R2)
+col1, col2, col3, col4 = st.columns(4)
 col1.metric("RMSE Model", f"{model_result.rmse:.4f}")
-col2.metric("R² Score", f"{model_result.r2:.4f} ({model_result.r2*100:.1f}%)")
-col3.metric("Total Sampel TPS", len(df))
+col2.metric("MAE Model", f"{model_result.mae:.4f}")
+col3.metric("R² Score", f"{model_result.r2:.4f} ({model_result.r2*100:.1f}%)")
+col4.metric("Total Sampel TPS", len(df))
 
 st.markdown("---")
 st.markdown("### Form Input Simulasi Prediksi")
@@ -51,8 +51,12 @@ with st.form("prediction_form"):
         kelurahan_val = st.text_input("Nama Kelurahan / Desa", value="BASIRIH")
         no_tps_val = st.text_input("Nomor TPS", value="001")
         dpt_val = st.number_input("Jumlah Daftar Pemilih Tetap (DPT) TPS", min_value=1, value=250, step=10)
-    with right:
         rasio_dpt = st.slider("Rasio DPT Terhadap Penduduk Kelurahan", 0.0, 3.0, 1.20, 0.01)
+        pendapatan_val = st.number_input("Pendapatan Per Kapita Kelurahan (Rp)", min_value=0.0, value=66989407.0, step=100000.0)
+    with right:
+        pengangguran_val = st.slider("Tingkat Pengangguran Kecamatan (%)", 0.0, 100.0, 6.56, 0.01)
+        kepadatan_val = st.number_input("Kepadatan Penduduk (jiwa/km²)", min_value=0.0, value=10550.43, step=50.0)
+        ipm_val = st.slider("Indeks Pembangunan Manusia (IPM) Kecamatan", 0.0, 100.0, 80.53, 0.01)
         usia_17_24 = st.slider("Pemilih Usia 17 - 24 Tahun (%)", 0.0, 100.0, 13.6, 0.1)
         usia_25_44 = st.slider("Pemilih Usia 25 - 44 Tahun (%)", 0.0, 100.0, 29.7, 0.1)
         usia_45_plus = st.slider("Pemilih Usia 45 Tahun Keatas (%)", 0.0, 100.0, 32.2, 0.1)
@@ -63,6 +67,10 @@ if submit:
     input_values = {
         "dpt": dpt_val,
         "rasio_dpt_terhadap_penduduk_kelurahan": rasio_dpt,
+        "pendapatan_per_kapita": pendapatan_val,
+        "tingkat_pengangguran": pengangguran_val,
+        "kepadatan_penduduk": kepadatan_val,
+        "ipm": ipm_val,
         "persen_usia_17_24_kec": usia_17_24,
         "persen_usia_25_44_kec": usia_25_44,
         "persen_usia_45_plus_kec": usia_45_plus,
@@ -79,10 +87,14 @@ if submit:
             "kelurahan": kelurahan_val.strip().upper(),
             "no_tps": no_tps_val.strip(),
             "dpt": dpt_val,
-            "rasio_dpt": rasio_dpt,
-            "usia_17_24": usia_17_24,
-            "usia_25_44": usia_25_44,
-            "usia_45_plus": usia_45_plus,
+            "rasio_dpt_terhadap_penduduk_kelurahan": rasio_dpt,
+            "pendapatan_per_kapita": pendapatan_val,
+            "tingkat_pengangguran": pengangguran_val,
+            "kepadatan_penduduk": kepadatan_val,
+            "ipm": ipm_val,
+            "persen_usia_17_24_kec": usia_17_24,
+            "persen_usia_25_44_kec": usia_25_44,
+            "persen_usia_45_plus_kec": usia_45_plus,
             "hasil_prediksi": prediction
         })
         st.success("Hasil prediksi berhasil disimpan ke database!")
@@ -113,12 +125,17 @@ if submit:
             "no_tps": no_tps_val.strip(),
             "dpt": dpt_val,
             "rasio_dpt": rasio_dpt,
+            "pendapatan_per_kapita": pendapatan_val,
+            "tingkat_pengangguran": pengangguran_val,
+            "kepadatan_penduduk": kepadatan_val,
+            "ipm": ipm_val,
             "usia_17_24": usia_17_24,
             "usia_25_44": usia_25_44,
             "usia_45_plus": usia_45_plus,
             "hasil_prediksi": prediction,
             "model_metrics": {
                 "rmse": model_result.rmse,
+                "mae": model_result.mae,
                 "r2": model_result.r2
             },
             "printed_by": st.session_state.get("username", "Guest")
@@ -138,14 +155,19 @@ if submit:
     # Detail Input
     st.markdown("#### Detail Parameter Input")
     col_a, col_b, col_c = st.columns(3)
-    col_a.markdown(f"**Kecamatan**: {kecamatan_val}")
-    col_a.markdown(f"**Kelurahan**: {kelurahan_val}")
-    col_a.markdown(f"**Nomor TPS**: {no_tps_val}")
-    col_b.markdown(f"**Jumlah DPT**: {dpt_val:,}".replace(",", "."))
-    col_b.markdown(f"**Rasio DPT**: {rasio_dpt:.4f}")
-    col_c.markdown(f"**Usia 17-24 (%)**: {usia_17_24:.1f}%")
-    col_c.markdown(f"**Usia 25-44 (%)**: {usia_25_44:.1f}%")
-    col_c.markdown(f"**Usia 45+ (%)**: {usia_45_plus:.1f}%")
+    with col_a:
+        st.markdown(f"**Kecamatan**: {kecamatan_val}")
+        st.markdown(f"**Kelurahan**: {kelurahan_val}")
+        st.markdown(f"**Nomor TPS**: {no_tps_val}")
+    with col_b:
+        st.markdown(f"**Jumlah DPT**: {dpt_val:,}".replace(",", "."))
+        st.markdown(f"**Rasio DPT**: {rasio_dpt:.4f}")
+        st.markdown(f"**Pendapatan Per Kapita**: Rp {pendapatan_val:,.0f}".replace(",", "."))
+    with col_c:
+        st.markdown(f"**Tingkat Pengangguran**: {pengangguran_val:.2f}%")
+        st.markdown(f"**Kepadatan Penduduk**: {kepadatan_val:.2f} jiwa/km²")
+        st.markdown(f"**IPM**: {ipm_val:.2f}")
+        st.markdown(f"**Usia 17-24 / 25-44 / 45+**: {usia_17_24:.1f}% / {usia_25_44:.1f}% / {usia_45_plus:.1f}%")
 
 st.markdown("---")
 from src.visualizations import feature_importance_bar
@@ -166,14 +188,17 @@ try:
             "kelurahan": "Kelurahan",
             "no_tps": "No TPS",
             "dpt": "DPT",
-            "rasio_dpt": "Rasio DPT",
-            "usia_17_24": "Usia 17-24 (%)",
-            "usia_25_44": "Usia 25-44 (%)",
-            "usia_45_plus": "Usia 45+ (%)",
+            "rasio_dpt_terhadap_penduduk_kelurahan": "Rasio DPT",
+            "pendapatan_per_kapita": "Pendapatan",
+            "tingkat_pengangguran": "Pengangguran (%)",
+            "kepadatan_penduduk": "Kepadatan",
+            "ipm": "IPM",
+            "persen_usia_17_24_kec": "Usia 17-24 (%)",
+            "persen_usia_25_44_kec": "Usia 25-44 (%)",
+            "persen_usia_45_plus_kec": "Usia 45+ (%)",
             "hasil_prediksi": "Hasil Prediksi (%)",
             "created_at": "Tanggal Analisa"
         })
-        # Format persentase hasil prediksi
         display_history["Hasil Prediksi (%)"] = display_history["Hasil Prediksi (%)"].apply(lambda x: f"{x:.2f}%")
         st.dataframe(display_history, use_container_width=True, hide_index=True)
 except Exception as e:
