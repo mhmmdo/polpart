@@ -1,109 +1,99 @@
-# Prediksi Partisipasi Politik Berbasis Random Forest & SQLite
+# Sistem Analisa dan Prediksi Partisipasi Politik (PolPart RF)
 
-Aplikasi ini dibuat menggunakan **Python + Streamlit** untuk menampilkan dashboard data partisipasi politik, data historis, prediksi Random Forest, visualisasi korelasi, feature importance, dan peta sederhana berbasis GeoJSON.
+Aplikasi web berbasis **Streamlit** dan **Machine Learning (Random Forest)** untuk menganalisis, memetakan, dan memprediksi persentase tingkat partisipasi politik masyarakat Kota Banjarmasin pada tingkat Tempat Pemungutan Suara (TPS).
 
-Sistem ini telah dimigrasi untuk menggunakan **database SQLite** sebagai penyimpanan utama, menggantikan pembacaan CSV langsung.
-
-> [!NOTE]
-> Database tersimpan di `database/polpart.db`. CSV hanya dipakai untuk import awal, bukan penyimpanan utama. Setelah data masuk SQLite, sistem membaca data secara dinamis dari database. GeoJSON tetap digunakan untuk peta kecamatan.
+Sistem menggunakan database relasional lokal **SQLite** untuk menyimpan seluruh data pemilu, log hasil prediksi, riwayat evaluasi model, serta tabel kredensial pengguna untuk sistem autentikasi masuk.
 
 ---
 
-## Struktur Folder
+## 📂 Struktur Direktori
 
 ```text
-polpart_streamlit_rf_pro/
-├── app.py
-├── pages/
-│   ├── 1_Dashboard.py
-│   ├── 2_Data_Historis.py
-│   ├── 3_Prediksi.py
-│   ├── 4_Visualisasi.py
-│   └── 5_Tentang.py
-├── src/
-│   ├── __init__.py
-│   ├── config.py
-│   ├── database.py
-│   ├── data_loader.py
-│   ├── model.py
-│   ├── ui.py
-│   ├── utils.py
-│   └── visualizations.py
+polpart/
+├── app.py                      # Main entrypoint aplikasi web (Tab Login/Register & routing)
+├── requirements.txt            # Daftar dependensi library Python
 ├── database/
-│   ├── polpart.db
-│   └── schema.sql
+│   ├── polpart.db              # Database SQLite lokal (berisi data riil & akun pengguna)
+│   └── schema.sql              # Rancangan skema tabel DDL SQLite
 ├── data/
 │   ├── import/
-│   │   └── data_final_template.csv
+│   │   └── data_final_template.csv  # Template format kolom CSV untuk upload
+│   ├── raw/
+│   │   └── data_partisipasi_per_tps.csv # Dataset riil pemilu 2024 (1.838 baris TPS)
 │   └── geo/
-│       └── kecamatan_5.geojson
-├── scripts/
-│   ├── init_db.py
-│   ├── import_csv_to_sqlite.py
-│   └── train_model.py
-├── models/
-├── assets/
-│   └── style.css
-├── requirements.txt
-└── README.md
+│       └── kecamatan_5.geojson # Batas wilayah geografis koordinat kecamatan
+├── docs/                       # Berkas draf laporan akademis Tugas Akhir (TA/PKL)
+│   ├── README_SISTEM.md        # Indeks dokumentasi
+│   ├── FLOWCHART_SISTEM.md     # Flowchart alur sistem detail per fitur
+│   ├── USE_CASE_DIAGRAM.md     # Diagram Use Case (Admin vs User)
+│   ├── RANCANGAN_DATABASE.md   # Skema kolom basis data SQLite
+│   ├── ERD.md                  # Entity Relationship Diagram (Mermaid)
+│   └── BAB_III_ANALISA_DAN_DESAIN.md # Draf Bab III Tugas Akhir
+├── src/                        # Modul penggerak logika (Back-end)
+│   ├── config.py               # Pengaturan konfigurasi, nama variabel, dan hyperparameter
+│   ├── database.py             # Konektor, CRUD SQLite, dan hash SHA-256 sandi
+│   ├── data_loader.py          # Loader data & penyiapan dataset siap latih
+│   ├── model.py                # Pelatihan model Random Forest Regressor & fungsi hitung prediksi
+│   ├── ui.py                   # UI helper, validasi peran sidebar, dan impor file CSV
+│   ├── utils.py                # Utilitas kecil (persentase, pembulatan, summary)
+│   ├── visualizations.py       # Visualisasi grafik interaktif Plotly & peta choropleth
+│   └── pdf_generator.py        # Pembuat laporan rekapitulasi PDF menggunakan fpdf2
+├── scripts/                    # Skrip CLI untuk inisialisasi & pemeliharaan model
+│   ├── init_db.py              # Inisialisasi DB, seeding default, dan impor otomatis data TPS
+│   ├── import_tps_csv.py       # Skrip penarik baris CSV ke tabel SQLite
+│   └── train_model.py          # Skrip manual untuk pelatihan & penyimpanan model (.joblib)
+└── models/                     # Tempat penyimpanan biner model terlatih (.joblib)
 ```
 
 ---
 
-## Fitur Utama
+## 🔑 Akun Default Sistem
+Tersedia dua peran pengguna bawaan yang dibuat otomatis saat inisialisasi database:
 
-1. **Dashboard**: Ringkasan data (rata-rata, tertinggi, terendah), grafik partisipasi per kecamatan, dan tren tahunan yang diambil dari SQLite.
-2. **Data Historis**: Tabel data dari database, fitur pencarian, filter tahun/wilayah, download CSV, serta evaluasi model Random Forest (RMSE, R², Feature Importance, scatter aktual vs prediksi). Data diperbarui melalui unggah CSV di sidebar.
-3. **Prediksi**: Memprediksi tingkat partisipasi politik berdasarkan input variabel sosio-ekonomi. Riwayat prediksi disimpan ke database dan ditampilkan di tabel bagian bawah.
-4. **Visualisasi**: Matriks korelasi antar variabel, grafik tren & perbandingan, dan peta choropleth kecamatan Banjarmasin menggunakan Plotly + GeoJSON.
-5. **Tentang**: Informasi detail metode Random Forest, alur sistem, sumber data, dan deskripsi tabel database.
-6. **Upload CSV**: Unggah CSV melalui sidebar untuk import/update data langsung ke SQLite (upsert), tanpa perlu script CLI.
+1. **Operator KPU (Admin)**:
+   * **Username**: `admin`
+   * **Password**: `admin123`
+   * **Hak Akses**: Dapat melihat visualisasi, melakukan simulasi prediksi, mendownload PDF, mengunggah file CSV baru di sidebar, dan melatih ulang model secara otomatis.
+   
+2. **Masyarakat (User)**:
+   * **Username**: `user`
+   * **Password**: `user123`
+   * **Hak Akses**: Dapat melihat visualisasi, melakukan simulasi prediksi, mendownload PDF, tetapi **tidak diizinkan** mengunggah file CSV.
 
 ---
 
-## Cara Menjalankan
+## 🚀 Panduan Instalasi & Menjalankan Aplikasi
 
-### 1. Install Dependency
-Pastikan Anda berada di folder root proyek ini dan jalankan perintah berikut untuk menginstal paket Python yang dibutuhkan:
-
+### 1. Kloning dan Masuk ke Folder Proyek
 ```bash
+git clone https://github.com/mhmmdo/polpart.git
+cd polpart
+```
+
+### 2. Pasang Dependensi
+Pastikan python 3.9+ terinstal. Sangat disarankan menggunakan virtual environment:
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Instalasi Library
 pip install -r requirements.txt
 ```
 
-### 2. Inisialisasi Database
-Jalankan skrip berikut untuk membuat folder database, file database `polpart.db`, menerapkan skema tabel, dan memasukkan data kecamatan default:
-
+### 3. Inisialisasi Database Pertama Kali
+Jalankan skrip berikut untuk membuat file database, menetapkan skema tabel, melakukan seeding akun admin/user bawaan, dan mengimpor 1.838 baris dataset TPS pemilu 2024:
 ```bash
 python scripts/init_db.py
 ```
 
-### 3. Letakkan CSV Template untuk Import Awal
-Letakkan file CSV data di path berikut:
-`data/import/data_final_template.csv`
-
-Format kolom CSV wajib:
-```text
-tahun,kecamatan,tingkat_pendidikan,pendapatan_per_kapita,tingkat_pengangguran,kepadatan_penduduk,ipm,partisipasi_politik
-```
-
-### 4. (Opsional) Import Data via UI
-Anda bisa mengunggah CSV langsung melalui widget di sidebar. Sistem akan melakukan upsert data ke database tanpa perlu script CLI.
-
-### 5. Jalankan Aplikasi Streamlit
-Setelah database terisi, jalankan aplikasi web Streamlit:
-
+### 4. Jalankan Aplikasi
 ```bash
 streamlit run app.py
 ```
+Aplikasi web akan terbuka otomatis di alamat `http://localhost:8501`.
 
 ---
 
-## Catatan Tambahan
-
-* **Training Model via Script**: Selain training otomatis dari aplikasi web, Anda juga dapat melatih model secara manual dari terminal:
-  ```bash
-  python scripts/train_model.py
-  ```
-  Model yang dilatih akan disimpan ke `models/random_forest_partisipasi.joblib`.
-* **GeoJSON**: Peta kecamatan menggunakan Plotly choropleth dengan file GeoJSON (`data/geo/kecamatan_5.geojson`), dicocokkan berdasarkan nama kecamatan pada atribut `WADMKC`.
-* **Upload CSV**: Unggah file CSV melalui sidebar untuk mengimpor/memperbarui data langsung ke database (upsert). Tidak perlu menjalankan script CLI untuk import data..
+## 📄 Pembuatan Laporan PDF
+Sistem dilengkapi modul pembuatan laporan PDF berbasis `fpdf2` yang merangkum parameter masukan prediksi pengguna, estimasi hasil keluaran prediksi, performa statistik model acuan (R² & RMSE), nama akun pencetak, serta stempel waktu cetak dalam tata letak yang rapi dan profesional.
