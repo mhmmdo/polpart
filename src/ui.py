@@ -178,6 +178,9 @@ def load_data_from_sidebar():
                 st.sidebar.error(f"Gagal memproses berkas: {e}")
     else:
         st.sidebar.info("Akses unggah CSV dinonaktifkan untuk akun Masyarakat.")
+        
+    from src.data_loader import load_dataset
+    return load_dataset()
 
 
 def sidebar_filters(df):
