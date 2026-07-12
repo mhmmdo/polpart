@@ -289,3 +289,118 @@ def register_user(username, password, role) -> bool:
             return True
     except sqlite3.IntegrityError:
         return False
+
+def seed_dapil():
+    """Seeds default dapil list into the dapil table."""
+    dapils = [
+        ("BANJARMASIN 1", "Kecamatan Banjarmasin Tengah"),
+        ("BANJARMASIN 2", "Kecamatan Banjarmasin Utara"),
+        ("BANJARMASIN 3", "Kecamatan Banjarmasin Timur"),
+        ("BANJARMASIN 4", "Kecamatan Banjarmasin Selatan"),
+        ("BANJARMASIN 5", "Kecamatan Banjarmasin Barat")
+    ]
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        for nama, wilayah in dapils:
+            cursor.execute("""
+                INSERT OR IGNORE INTO dapil (nama_dapil, wilayah_cakupan) VALUES (?, ?)
+            """, (nama, wilayah))
+        conn.commit()
+
+def seed_partai():
+    """Seeds major political parties into the partai table."""
+    partai_list = [
+        ("Partai Kebangkitan Bangsa", "PKB", 1),
+        ("Partai Gerakan Indonesia Raya", "GERINDRA", 2),
+        ("Partai Demokrasi Indonesia Perjuangan", "PDIP", 3),
+        ("Partai Golongan Karya", "GOLKAR", 4),
+        ("Partai NasDem", "NASDEM", 5),
+        ("Partai Buruh", "BURUH", 6),
+        ("Partai Gelombang Rakyat Indonesia", "GELORA", 7),
+        ("Partai Keadilan Sejahtera", "PKS", 8),
+        ("Partai Kebangkitan Nusantara", "PKN", 9),
+        ("Partai Hati Nurani Rakyat", "HANURA", 10),
+        ("Partai Garda Republik Indonesia", "GARUDA", 11),
+        ("Partai Amanat Nasional", "PAN", 12),
+        ("Partai Bulan Bintang", "PBB", 13),
+        ("Partai Demokrat", "DEMOKRAT", 14),
+        ("Partai Solidaritas Indonesia", "PSI", 15),
+        ("Partai Perindo", "PERINDO", 16),
+        ("Partai Persatuan Pembangunan", "PPP", 17),
+        ("Partai Ummat", "UMMAT", 24)
+    ]
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        for nama, singkatan, no_urut in partai_list:
+            cursor.execute("""
+                INSERT OR IGNORE INTO partai (nama_partai, singkatan, nomor_urut) VALUES (?, ?, ?)
+            """, (nama, singkatan, no_urut))
+        conn.commit()
+
+def seed_pemilu():
+    """Seeds election periods into the pemilu table."""
+    pemilu_list = [
+        (2019, "Pemilu Serentak 2019 (Pileg & Pilpres)", 0),
+        (2024, "Pemilu Serentak 2024 (Pileg & Pilpres)", 1)
+    ]
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        for tahun, jenis, status in pemilu_list:
+            cursor.execute("""
+                INSERT OR IGNORE INTO pemilu (tahun_pemilu, jenis_pemilu, status_aktif) VALUES (?, ?, ?)
+            """, (tahun, jenis, status))
+        conn.commit()
+
+def seed_relational_tables_from_tps():
+    """Extracts unique kelurahan and tps from data_partisipasi_tps, and inserts them into master tables."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        
+        # 1. Populate kelurahan
+        cursor.execute("SELECT DISTINCT kecamatan, kelurahan FROM data_partisipasi_tps")
+        rows = cursor.fetchall()
+        for kec_name, kel_name in rows:
+            cursor.execute("SELECT id_kecamatan FROM kecamatan WHERE nama_kecamatan = ?", (kec_name.strip().upper(),))
+            kec_row = cursor.fetchone()
+            kec_id = kec_row[0] if kec_row else None
+            if kec_id:
+                cursor.execute("""
+                    INSERT OR IGNORE INTO kelurahan (nama_kelurahan, id_kecamatan) VALUES (?, ?)
+                """, (kel_name.strip().upper(), kec_id))
+        conn.commit()
+        
+        # 2. Populate tps
+        cursor.execute("SELECT DISTINCT kelurahan, no_tps FROM data_partisipasi_tps")
+        tps_rows = cursor.fetchall()
+        for kel_name, no_tps in tps_rows:
+            cursor.execute("SELECT id_kelurahan FROM kelurahan WHERE nama_kelurahan = ?", (kel_name.strip().upper(),))
+            kel_row = cursor.fetchone()
+            kel_id = kel_row[0] if kel_row else None
+            if kel_id:
+                cursor.execute("SELECT id_tps FROM tps WHERE no_tps = ? AND id_kelurahan = ?", (no_tps.strip(), kel_id))
+                if not cursor.fetchone():
+                    cursor.execute("""
+                        INSERT INTO tps (no_tps, id_kelurahan) VALUES (?, ?)
+                    """, (no_tps.strip(), kel_id))
+        conn.commit()
+        
+        # 3. Populate suara_partai_tps with mock votes for Indonesian political parties
+        cursor.execute("SELECT id_tps FROM tps")
+        tps_ids = [r[0] for r in cursor.fetchall()]
+        
+        cursor.execute("SELECT id_partai FROM partai")
+        partai_ids = [r[0] for r in cursor.fetchall()]
+        
+        cursor.execute("SELECT COUNT(*) FROM suara_partai_tps")
+        exist_count = cursor.fetchone()[0]
+        if exist_count == 0 and tps_ids and partai_ids:
+            suara_data = []
+            for t_id in tps_ids[:100]: # Seed for first 100 TPS to keep it fast
+                for p_id in partai_ids:
+                    jumlah_suara = (t_id * p_id + 7) % 45
+                    suara_data.append((t_id, p_id, jumlah_suara))
+            
+            cursor.executemany("""
+                INSERT INTO suara_partai_tps (id_tps, id_partai, jumlah_suara) VALUES (?, ?, ?)
+            """, suara_data)
+            conn.commit()

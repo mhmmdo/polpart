@@ -195,6 +195,11 @@ def load_data_from_sidebar():
                                 skipped_count += 1
                                 
                         conn.commit()
+                        
+                        # Sync new relational tables
+                        from src.database import seed_relational_tables_from_tps
+                        seed_relational_tables_from_tps()
+                        
                     st.sidebar.success(f"Berhasil impor {success_count} data!")
                     st.rerun()
             except Exception as e:

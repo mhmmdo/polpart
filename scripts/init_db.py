@@ -9,7 +9,7 @@ import sys
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT_DIR))
 
-from src.database import init_database, seed_kecamatan, seed_admin
+from src.database import init_database, seed_kecamatan, seed_admin, seed_dapil, seed_partai, seed_pemilu
 from src.config import DB_PATH
 
 def main():
@@ -28,6 +28,15 @@ def main():
 
         seed_kecamatan()
         print("Seeding data kecamatan default selesai.")
+
+        seed_dapil()
+        print("Seeding data dapil selesai.")
+
+        seed_partai()
+        print("Seeding data partai politik selesai.")
+
+        seed_pemilu()
+        print("Seeding data pemilu selesai.")
 
         seed_admin()
         print("Seeding akun Admin/User default selesai.")

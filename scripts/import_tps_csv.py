@@ -224,6 +224,12 @@ def main():
         print("Mengimpor data agregat 2019...")
         import_2019_agregat()
         
+        # Populate new master and transaction tables from the imported TPS data
+        print("Mengisi tabel master kelurahan, tps, dan suara_partai_tps...")
+        from src.database import seed_relational_tables_from_tps
+        seed_relational_tables_from_tps()
+        print("Pengisian tabel relasional baru selesai.")
+        
     except Exception as e:
         print(f"Error sistem saat impor TPS: {e}")
         sys.exit(1)
