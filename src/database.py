@@ -404,3 +404,219 @@ def seed_relational_tables_from_tps():
                 INSERT INTO suara_partai_tps (id_tps, id_partai, jumlah_suara) VALUES (?, ?, ?)
             """, suara_data)
             conn.commit()
+
+def add_partai(nama_partai: str, singkatan: str, nomor_urut: int) -> bool:
+    """Adds a new political party into the database."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO partai (nama_partai, singkatan, nomor_urut) VALUES (?, ?, ?)
+            """, (nama_partai.strip(), singkatan.strip().upper(), int(nomor_urut)))
+            conn.commit()
+            return True
+    except sqlite3.IntegrityError:
+        return False
+
+def delete_partai(id_partai: int) -> bool:
+    """Deletes a political party by ID from the database."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM partai WHERE id_partai = ?", (int(id_partai),))
+            conn.commit()
+            return True
+    except Exception:
+        return False
+
+def get_kelurahannya_by_kecamatan(kecamatan_name: str, tahun_pemilu: int = 2024) -> list[str]:
+    """Retrieves list of kelurahan names for a given kecamatan and election year."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT kelurahan FROM data_partisipasi_tps 
+            WHERE kecamatan = ? AND tahun_pemilu = ?
+            ORDER BY kelurahan ASC
+        """, (kecamatan_name.strip().upper(), int(tahun_pemilu)))
+        return [r[0] for r in cursor.fetchall()]
+
+def get_tps_by_kelurahan(kecamatan_name: str, kelurahan_name: str, tahun_pemilu: int = 2024) -> list[str]:
+    """Retrieves list of TPS numbers for a given kelurahan, kecamatan, and election year."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT no_tps FROM data_partisipasi_tps 
+            WHERE kecamatan = ? AND kelurahan = ? AND tahun_pemilu = ?
+            ORDER BY CAST(no_tps AS INTEGER), no_tps ASC
+        """, (kecamatan_name.strip().upper(), kelurahan_name.strip().upper(), int(tahun_pemilu)))
+        return [r[0] for r in cursor.fetchall()]
+
+def get_tps_demographics(kecamatan: str, kelurahan: str, no_tps: str, tahun_pemilu: int = 2024) -> dict or None:
+    """Retrieves variables / demographics for a single specific TPS and election year."""
+    with get_connection() as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM data_partisipasi_tps 
+            WHERE kecamatan = ? AND kelurahan = ? AND no_tps = ? AND tahun_pemilu = ?
+            LIMIT 1
+        """, (kecamatan.strip().upper(), kelurahan.strip().upper(), no_tps.strip(), int(tahun_pemilu)))
+        row = cursor.fetchone()
+        if row:
+            return dict(row)
+        return None
+
+def update_partai(id_partai: int, nama_partai: str, singkatan: str, nomor_urut: int) -> bool:
+    """Updates a political party's details in the database."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE partai 
+                SET nama_partai = ?, singkatan = ?, nomor_urut = ?
+                WHERE id_partai = ?
+            """, (nama_partai.strip(), singkatan.strip().upper(), int(nomor_urut), int(id_partai)))
+            conn.commit()
+            return True
+    except Exception:
+        return False
+
+def add_tps_record(data: dict) -> bool:
+    """Inserts a new TPS record into the database."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            dpt = int(data.get('dpt', 0))
+            pilih = int(data.get('pengguna_hak_pilih', 0))
+            partisipasi = (float(pilih) / float(dpt) * 100.0) if dpt > 0 else 0.0
+            
+            cursor.execute("""
+                INSERT INTO data_partisipasi_tps (
+                    tahun_pemilu, level_data, kecamatan, kelurahan, no_tps, id_record,
+                    dpt, pengguna_hak_pilih, partisipasi_politik, dpt_total_tps,
+                    penduduk_total_kelurahan, penduduk_total_kecamatan, rasio_dpt_terhadap_penduduk_kelurahan,
+                    pendapatan_per_kapita, tingkat_pengangguran, kepadatan_penduduk, ipm,
+                    jumlah_usia_17_24_kec, jumlah_usia_25_44_kec, jumlah_usia_45_plus_kec,
+                    persen_usia_17_24_kec, persen_usia_25_44_kec, persen_usia_45_plus_kec
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                int(data.get('tahun_pemilu', 2024)),
+                'tps',
+                str(data.get('kecamatan', '')).strip().upper(),
+                str(data.get('kelurahan', '')).strip().upper(),
+                str(data.get('no_tps', '')).strip(),
+                f"{data.get('tahun_pemilu')}-{data.get('kecamatan')}-{data.get('kelurahan')}-{data.get('no_tps')}".strip().upper(),
+                dpt,
+                pilih,
+                partisipasi,
+                int(data.get('dpt_total_tps', dpt)),
+                str(data.get('penduduk_total_kelurahan', '')),
+                int(data.get('penduduk_total_kecamatan', 0)),
+                float(data.get('rasio_dpt_terhadap_penduduk_kelurahan', 0.0)),
+                float(data.get('pendapatan_per_kapita', 0.0)),
+                float(data.get('tingkat_pengangguran', 0.0)),
+                float(data.get('kepadatan_penduduk', 0.0)),
+                float(data.get('ipm', 0.0)),
+                int(data.get('jumlah_usia_17_24_kec', 0)),
+                int(data.get('jumlah_usia_25_44_kec', 0)),
+                int(data.get('jumlah_usia_45_plus_kec', 0)),
+                float(data.get('persen_usia_17_24_kec', 0.0)),
+                float(data.get('persen_usia_25_44_kec', 0.0)),
+                float(data.get('persen_usia_45_plus_kec', 0.0))
+            ))
+            conn.commit()
+            
+            # Sync relational tables
+            seed_relational_tables_from_tps()
+            return True
+    except Exception as e:
+        import sys
+        print(f"Error add_tps_record: {e}", file=sys.stderr)
+        return False
+
+def update_tps_record(tps_id: int, data: dict) -> bool:
+    """Updates an existing TPS record in the database."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            dpt = int(data.get('dpt', 0))
+            pilih = int(data.get('pengguna_hak_pilih', 0))
+            partisipasi = (float(pilih) / float(dpt) * 100.0) if dpt > 0 else 0.0
+            
+            cursor.execute("""
+                UPDATE data_partisipasi_tps SET
+                    tahun_pemilu = ?,
+                    kecamatan = ?,
+                    kelurahan = ?,
+                    no_tps = ?,
+                    id_record = ?,
+                    dpt = ?,
+                    pengguna_hak_pilih = ?,
+                    partisipasi_politik = ?,
+                    dpt_total_tps = ?,
+                    penduduk_total_kelurahan = ?,
+                    penduduk_total_kecamatan = ?,
+                    rasio_dpt_terhadap_penduduk_kelurahan = ?,
+                    pendapatan_per_kapita = ?,
+                    tingkat_pengangguran = ?,
+                    kepadatan_penduduk = ?,
+                    ipm = ?,
+                    jumlah_usia_17_24_kec = ?,
+                    jumlah_usia_25_44_kec = ?,
+                    jumlah_usia_45_plus_kec = ?,
+                    persen_usia_17_24_kec = ?,
+                    persen_usia_25_44_kec = ?,
+                    persen_usia_45_plus_kec = ?
+                WHERE id = ?
+            """, (
+                int(data.get('tahun_pemilu', 2024)),
+                str(data.get('kecamatan', '')).strip().upper(),
+                str(data.get('kelurahan', '')).strip().upper(),
+                str(data.get('no_tps', '')).strip(),
+                f"{data.get('tahun_pemilu')}-{data.get('kecamatan')}-{data.get('kelurahan')}-{data.get('no_tps')}".strip().upper(),
+                dpt,
+                pilih,
+                partisipasi,
+                int(data.get('dpt_total_tps', dpt)),
+                str(data.get('penduduk_total_kelurahan', '')),
+                int(data.get('penduduk_total_kecamatan', 0)),
+                float(data.get('rasio_dpt_terhadap_penduduk_kelurahan', 0.0)),
+                float(data.get('pendapatan_per_kapita', 0.0)),
+                float(data.get('tingkat_pengangguran', 0.0)),
+                float(data.get('kepadatan_penduduk', 0.0)),
+                float(data.get('ipm', 0.0)),
+                int(data.get('jumlah_usia_17_24_kec', 0)),
+                int(data.get('jumlah_usia_25_44_kec', 0)),
+                int(data.get('jumlah_usia_45_plus_kec', 0)),
+                float(data.get('persen_usia_17_24_kec', 0.0)),
+                float(data.get('persen_usia_25_44_kec', 0.0)),
+                float(data.get('persen_usia_45_plus_kec', 0.0)),
+                int(tps_id)
+            ))
+            conn.commit()
+            
+            # Sync relational tables
+            seed_relational_tables_from_tps()
+            return True
+    except Exception as e:
+        import sys
+        print(f"Error update_tps_record: {e}", file=sys.stderr)
+        return False
+
+def delete_tps_record(tps_id: int) -> bool:
+    """Deletes a TPS record from the database."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM data_partisipasi_tps WHERE id = ?", (int(tps_id),))
+            conn.commit()
+            
+            # Sync relational tables
+            seed_relational_tables_from_tps()
+            return True
+    except Exception as e:
+        import sys
+        print(f"Error delete_tps_record: {e}", file=sys.stderr)
+        return False
+
+

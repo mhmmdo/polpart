@@ -61,8 +61,12 @@ def load_dataset_2019() -> pd.DataFrame:
 
 
 def load_dataset() -> pd.DataFrame:
-    """Fallback alias to load 2024 dataset."""
-    return load_dataset_2024()
+    """Loads all raw TPS records from the database (all years) and standardizes columns."""
+    from src.database import get_tps_data
+    df = get_tps_data()
+    if not df.empty and "tahun_pemilu" in df.columns and "tahun" not in df.columns:
+        df["tahun"] = df["tahun_pemilu"]
+    return df
 
 
 def get_training_dataset_2024() -> pd.DataFrame:
@@ -151,32 +155,38 @@ def get_summary_2019(df: pd.DataFrame) -> dict:
 
 
 def get_comparison_2019_2024() -> pd.DataFrame:
-    """Aggregates 2024 TPS to kecamatan level and merges with 2019 aggregated data."""
-    df_2019 = load_dataset_2019()
-    df_2024 = load_dataset_2024()
-    
-    if df_2019.empty or df_2024.empty:
-        return pd.DataFrame()
+    """Aggregates 2024 and 2019 TPS data from data_partisipasi_tps to kecamatan level and merges them."""
+    from src.database import get_connection
+    try:
+        with get_connection() as conn:
+            df_2024 = pd.read_sql_query("""
+                SELECT kecamatan, SUM(dpt) as dpt, SUM(pengguna_hak_pilih) as pengguna
+                FROM data_partisipasi_tps
+                WHERE tahun_pemilu = 2024
+                GROUP BY kecamatan
+            """, conn)
+            df_2019 = pd.read_sql_query("""
+                SELECT kecamatan, SUM(dpt) as dpt, SUM(pengguna_hak_pilih) as pengguna
+                FROM data_partisipasi_tps
+                WHERE tahun_pemilu = 2019
+                GROUP BY kecamatan
+            """, conn)
+            
+        if df_2024.empty or df_2019.empty:
+            return pd.DataFrame()
+            
+        df_2024["partisipasi_2024"] = (df_2024["pengguna"] / df_2024["dpt"]) * 100.0
+        df_24_clean = df_2024[["kecamatan", "partisipasi_2024"]]
         
-    # Group 2024 to kecamatan level
-    grp_2024 = df_2024.groupby("kecamatan", as_index=False).agg({
-        "dpt": "sum",
-        "pengguna_hak_pilih": "sum"
-    })
-    grp_2024["partisipasi_2024"] = (grp_2024["pengguna_hak_pilih"] / grp_2024["dpt"]) * 100.0
-    grp_2024 = grp_2024[["kecamatan", "partisipasi_2024"]]
-    
-    # Group 2019 to kecamatan level
-    grp_2019 = df_2019.groupby("kecamatan", as_index=False).agg({
-        "dpt_total": "sum",
-        "pengguna_total": "sum"
-    })
-    grp_2019["partisipasi_2019"] = (grp_2019["pengguna_total"] / grp_2019["dpt_total"]) * 100.0
-    grp_2019 = grp_2019[["kecamatan", "partisipasi_2019"]]
-    
-    # Merge and standardize
-    merged = pd.merge(grp_2019, grp_2024, on="kecamatan", how="outer")
-    return merged
+        df_2019["partisipasi_2019"] = (df_2019["pengguna"] / df_2019["dpt"]) * 100.0
+        df_19_clean = df_2019[["kecamatan", "partisipasi_2019"]]
+        
+        merged = pd.merge(df_19_clean, df_24_clean, on="kecamatan", how="outer")
+        return merged
+    except Exception as e:
+        import sys
+        print(f"Error in get_comparison_2019_2024: {e}", file=sys.stderr)
+        return pd.DataFrame()
 
 
 @st.cache_data(show_spinner=False)

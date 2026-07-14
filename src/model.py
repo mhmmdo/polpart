@@ -25,12 +25,7 @@ class ModelResult:
 def train_random_forest(df: pd.DataFrame) -> ModelResult:
     """Fungsi utama untuk melatih algoritma Random Forest menggunakan data yang diberikan."""
     
-    # Memastikan hanya melatih menggunakan data pemilu tahun 2024
-    if "tahun" in df.columns:
-        df = df[df["tahun"] == 2024]
-    elif "tahun_pemilu" in df.columns:
-        df = df[df["tahun_pemilu"] == 2024]
-        
+
     # 1. Menghapus baris data yang kosong (NaN) pada kolom Fitur (Soal) dan Target (Kunci Jawaban)
     data = df.dropna(subset=[*FEATURE_COLUMNS, TARGET_COLUMN]).copy()
 

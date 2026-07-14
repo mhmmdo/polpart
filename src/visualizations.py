@@ -166,3 +166,43 @@ def participation_comparison_chart(comp_df: pd.DataFrame):
     fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
     fig.update_layout(yaxis_ticksuffix="%", xaxis_title="", yaxis_title="Partisipasi Politik (%)")
     return fig
+
+
+def dynamic_participation_comparison_chart(comp_df: pd.DataFrame, y1: int, y2: int):
+    """Draws a grouped bar chart comparing any two years' participation rates."""
+    import plotly.express as px
+    if comp_df.empty:
+        return px.scatter(title="Data Perbandingan Tidak Tersedia")
+        
+    col_y1 = f"partisipasi_{y1}"
+    col_y2 = f"partisipasi_{y2}"
+    
+    # Melt dataframe for easy plotting with px.bar
+    melted = comp_df.melt(
+        id_vars=["kecamatan"],
+        value_vars=[col_y1, col_y2],
+        var_name="Tahun",
+        value_name="Partisipasi"
+    )
+    melted["Tahun"] = melted["Tahun"].map({
+        col_y1: f"{y1} (Agg)",
+        col_y2: f"{y2} (Agg)"
+    })
+    
+    fig = px.bar(
+        melted,
+        x="kecamatan",
+        y="Partisipasi",
+        color="Tahun",
+        barmode="group",
+        text="Partisipasi",
+        title=f"Perbandingan Rata-rata Partisipasi Politik Per Kecamatan ({y1} vs {y2})",
+        template="plotly_white",
+        color_discrete_map={
+            f"{y1} (Agg)": "#94A3B8", # Slate/Gray
+            f"{y2} (Agg)": "#ff7f66"   # Coral
+        }
+    )
+    fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+    fig.update_layout(yaxis_ticksuffix="%", xaxis_title="", yaxis_title="Partisipasi Politik (%)")
+    return fig
