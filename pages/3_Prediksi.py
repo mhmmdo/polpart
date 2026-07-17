@@ -2,9 +2,6 @@ import streamlit as st
 import pandas as pd
 
 from src.config import FEATURE_COLUMNS
-import importlib
-import src.model
-importlib.reload(src.model)
 from src.model import predict_participation, train_random_forest
 from src.ui import load_data_from_sidebar, render_header, setup_page
 from src.database import (
@@ -35,16 +32,9 @@ active_year = st.selectbox("Pilih Tahun Pemilu Aktif", years, index=default_inde
 # 3. Saring data khusus tahun aktif untuk pelatihan model secara fleksibel
 df_train = df[df["tahun"] == active_year]
 
-# Membuat hash unik dari data untuk menjamin cache di-update saat database berubah
-data_hash = f"{len(df_train)}_{df_train['dpt'].sum() if 'dpt' in df_train.columns else 0}_{active_year}_v3"
-
-@st.cache_resource(show_spinner="Sedang melatih dan mengoptimalkan model regresi terbaik... (Harap tunggu 3-5 detik)")
-def get_cached_model(data_df: pd.DataFrame, year: int, d_hash: str):
-    return train_random_forest(data_df)
-
 try:
-    # 4. Latih model otomatis (menggunakan cache Streamlit yang divalidasi oleh hash data)
-    model_result = get_cached_model(df_train, active_year, data_hash)
+    # 4. Latih model Random Forest otomatis berdasarkan data tahun aktif
+    model_result = train_random_forest(df_train)
 except ValueError as error:
     st.error(f"Gagal melatih model untuk tahun {active_year}: {error}")
     st.stop()
@@ -219,11 +209,6 @@ with tab_prediksi:
             # Jalankan prediksi
             if st.button("Jalankan Prediksi Partisipasi Politik", use_container_width=True, type="primary"):
                 input_values = {
-                    "kecamatan": kecamatan_val,
-                    "kelurahan": kelurahan_val,
-                    "no_tps": no_tps_val,
-                    "tahun": active_year,
-                    "tahun_pemilu": active_year,
                     "dpt": tps_data['dpt'],
                     "rasio_dpt_terhadap_penduduk_kelurahan": tps_data['rasio_dpt_terhadap_penduduk_kelurahan'],
                     "pendapatan_per_kapita": tps_data['pendapatan_per_kapita'],

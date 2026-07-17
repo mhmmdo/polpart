@@ -27,17 +27,8 @@ def main():
     joblib.dump(result.model, model_path)
 
     print("Model berhasil disimpan:", model_path)
-    print("\n--- METRIK SEBELUM OPTIMASI (BASELINE) ---")
-    if result.baseline_metrics:
-        print(f"R2 Score : {result.baseline_metrics['r2']:.4f}")
-        print(f"MAE      : {result.baseline_metrics['mae']:.4f}")
-        print(f"RMSE     : {result.baseline_metrics['rmse']:.4f}")
-        
-    print("\n--- METRIK SESUDAH OPTIMASI (TUNED MODEL) ---")
-    print(f"R2 Score : {result.r2:.4f}")
-    print(f"MAE      : {result.mae:.4f}")
-    print(f"RMSE     : {result.rmse:.4f}")
-    print(f"Best Hyperparameters: {result.best_params}")
+    print(f"RMSE: {result.rmse:.3f}")
+    print(f"R2  : {result.r2:.3f}")
 
 
 if __name__ == "__main__":

@@ -68,7 +68,7 @@ if chart_df.empty:
 else:
     # 2. Menampilkan grafik batang rata-rata partisipasi per kecamatan
     st.markdown("---")
-    st.markdown(f"### Rata-rata Partisipasi Politik Pemilu {selected_year} per Kecamatan")
+    st.markdown("### Rata-rata Partisipasi Politik Pemilu 2024 per Kecamatan")
     fig_area = participation_by_area(chart_df)
     st.plotly_chart(fig_area, use_container_width=True, theme=None)
 
@@ -135,7 +135,7 @@ else:
         try:
             geojson = load_geojson()
             st.plotly_chart(participation_map(chart_df, geojson, selected_map_year), use_container_width=True, theme=None)
-            st.caption(f"Peta spasial di atas mengagregasikan data TPS pemilu {selected_map_year} ke tingkat kecamatan secara dinamis agar sesuai dengan batas wilayah GeoJSON.")
+            st.caption("Peta spasial di atas mengagregasikan data TPS pemilu 2024 ke tingkat kecamatan secara dinamis agar sesuai dengan batas wilayah GeoJSON.")
         except Exception as error:
             st.warning(f"Peta gagal dimuat: {error}")
 

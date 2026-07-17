@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS pemilu (
 -- TABEL TRANSAKSI / LOG DATA (MINIMAL 5 TABEL / VARIAN)
 -- ====================================================================
 
--- 1. Transaksi Partisipasi TPS
+-- 1. Transaksi Partisipasi TPS 2024
 CREATE TABLE IF NOT EXISTS data_partisipasi_tps (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tahun_pemilu INTEGER NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS data_partisipasi_tps (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Transaksi Partisipasi Agregat Historis
+-- 2. Transaksi Partisipasi Agregat Historis 2019
 CREATE TABLE IF NOT EXISTS data_partisipasi_agregat (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tahun_pemilu INTEGER,
@@ -170,7 +170,8 @@ SELECT
     persen_usia_17_24_kec,
     persen_usia_25_44_kec,
     persen_usia_45_plus_kec
-FROM data_partisipasi_tps;
+FROM data_partisipasi_tps
+WHERE tahun_pemilu = 2024;
 
 -- View Laporan Partisipasi Politik (Memenuhi Ketentuan C: minimal 5 atribut dan >1000 data)
 DROP VIEW IF EXISTS laporan_partisipasi_politik;
