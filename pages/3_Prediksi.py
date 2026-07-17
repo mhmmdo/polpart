@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 
 from src.config import FEATURE_COLUMNS
+import importlib
+import src.model
+importlib.reload(src.model)
 from src.model import predict_participation, train_random_forest
 from src.ui import load_data_from_sidebar, render_header, setup_page
 from src.database import (
@@ -209,6 +212,11 @@ with tab_prediksi:
             # Jalankan prediksi
             if st.button("Jalankan Prediksi Partisipasi Politik", use_container_width=True, type="primary"):
                 input_values = {
+                    "kecamatan": kecamatan_val,
+                    "kelurahan": kelurahan_val,
+                    "no_tps": no_tps_val,
+                    "tahun": active_year,
+                    "tahun_pemilu": active_year,
                     "dpt": tps_data['dpt'],
                     "rasio_dpt_terhadap_penduduk_kelurahan": tps_data['rasio_dpt_terhadap_penduduk_kelurahan'],
                     "pendapatan_per_kapita": tps_data['pendapatan_per_kapita'],
