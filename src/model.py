@@ -108,8 +108,12 @@ def train_random_forest(df: pd.DataFrame) -> ModelResult:
         raise ValueError("Data setelah pembersihan terlalu sedikit untuk melanjutkan modeling.")
 
     # 3. MENYIAPKAN FITUR & TARGET BARU
-    # Tentukan nama kolom tahun jika ada
-    year_col = 'tahun' if 'tahun' in df_clean.columns else ('tahun_pemilu' if 'tahun_pemilu' in df_clean.columns else None)
+    # Tentukan nama kolom tahun jika ada dan memiliki lebih dari 1 nilai unik (tidak konstan)
+    year_col = None
+    if 'tahun' in df_clean.columns and df_clean['tahun'].nunique() > 1:
+        year_col = 'tahun'
+    elif 'tahun_pemilu' in df_clean.columns and df_clean['tahun_pemilu'].nunique() > 1:
+        year_col = 'tahun_pemilu'
 
     # Kita menggunakan fitur asli + kecamatan + kelurahan + no_tps (no_tps digunakan oleh transformer)
     cols_to_use = list(FEATURE_COLUMNS) + ['kecamatan', 'kelurahan', 'no_tps']
@@ -190,10 +194,10 @@ def train_random_forest(df: pd.DataFrame) -> ModelResult:
             ('model', HistGradientBoostingRegressor(random_state=42))
         ])
         param_grid = {
-            'model__max_iter': [50, 100, 150],
+            'model__max_iter': [100, 150],
             'model__max_depth': [3, 5, 7],
-            'model__learning_rate': [0.05, 0.1, 0.2],
-            'model__min_samples_leaf': [5, 10, 20]
+            'model__learning_rate': [0.05, 0.1],
+            'model__min_samples_leaf': [10, 20]
         }
     else:
         # Fallback ke Random Forest tuning
@@ -203,9 +207,9 @@ def train_random_forest(df: pd.DataFrame) -> ModelResult:
             ('model', RandomForestRegressor(random_state=42))
         ])
         param_grid = {
-            'model__n_estimators': [100, 200, 300],
+            'model__n_estimators': [100, 200],
             'model__max_depth': [6, 10, 15],
-            'model__min_samples_leaf': [1, 2, 4]
+            'model__min_samples_leaf': [2, 4]
         }
 
     grid = GridSearchCV(tuning_pipeline, param_grid, cv=5, scoring='r2', n_jobs=-1)
