@@ -170,9 +170,21 @@ if admin_menu == "Impor CSV":
 # 2. Menu Kelola Partai
 elif admin_menu == "Kelola Partai":
     st.markdown("#### Kelola Partai Politik")
-    opt_partai = st.radio("Pilih Tindakan", ["Tambah Partai Baru", "Edit Partai", "Hapus Partai"], horizontal=True)
+    opt_partai = st.radio("Pilih Tindakan", ["Lihat Daftar Partai", "Tambah Partai Baru", "Edit Partai", "Hapus Partai"], horizontal=True)
     
-    if opt_partai == "Tambah Partai Baru":
+    if opt_partai == "Lihat Daftar Partai":
+        st.markdown("##### Daftar Partai Politik Terdaftar")
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                df_partai = pd.read_sql_query("SELECT nomor_urut AS 'No Urut', singkatan AS 'Singkatan', nama_partai AS 'Nama Partai' FROM partai ORDER BY nomor_urut", conn)
+            if df_partai.empty:
+                st.info("Belum ada partai politik yang terdaftar.")
+            else:
+                st.dataframe(df_partai, use_container_width=True, hide_index=True)
+        except Exception as e:
+            st.error(f"Gagal memuat daftar partai: {e}")
+            
+    elif opt_partai == "Tambah Partai Baru":
         st.markdown("##### Tambah Partai Politik Baru")
         with st.form("add_partai_db_form"):
             no_urut_p = st.number_input("Nomor Urut", min_value=1, max_value=100, value=1)
@@ -245,14 +257,37 @@ elif admin_menu == "Kelola Partai":
                 else:
                     st.error("Gagal menghapus partai dari database.")
 
+    pass
+
 # 3. Menu Kelola TPS
 elif admin_menu == "Kelola TPS":
     st.markdown("#### Kelola Data TPS Pemilu")
-    opt_tps = st.radio("Pilih Tindakan TPS", ["Tambah TPS Baru", "Edit TPS", "Hapus TPS"], horizontal=True)
+    opt_tps = st.radio("Pilih Tindakan TPS", ["Lihat Daftar TPS", "Tambah TPS Baru", "Edit TPS", "Hapus TPS"], horizontal=True)
     
     kec_options = ["BANJARMASIN BARAT", "BANJARMASIN SELATAN", "BANJARMASIN TIMUR", "BANJARMASIN TENGAH", "BANJARMASIN UTARA"]
     
-    if opt_tps == "Tambah TPS Baru":
+    if opt_tps == "Lihat Daftar TPS":
+        st.markdown("##### Daftar Tempat Pemungutan Suara (TPS) Terdaftar")
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                df_tps_list = pd.read_sql_query("""
+                    SELECT 
+                        t.no_tps AS 'No TPS', 
+                        k.nama_kelurahan AS 'Kelurahan', 
+                        kc.nama_kecamatan AS 'Kecamatan'
+                    FROM tps t
+                    JOIN kelurahan k ON t.id_kelurahan = k.id_kelurahan
+                    JOIN kecamatan kc ON k.id_kecamatan = kc.id_kecamatan
+                    ORDER BY kc.nama_kecamatan, k.nama_kelurahan, t.no_tps
+                """, conn)
+            if df_tps_list.empty:
+                st.info("Belum ada TPS yang terdaftar.")
+            else:
+                st.dataframe(df_tps_list, use_container_width=True, hide_index=True)
+        except Exception as e:
+            st.error(f"Gagal memuat daftar TPS: {e}")
+            
+    elif opt_tps == "Tambah TPS Baru":
         st.markdown("##### Input Rekaman Data TPS Baru")
         with st.form("form_tambah_tps_db"):
             col_tf1, col_tf2 = st.columns(2)
@@ -272,6 +307,29 @@ elif admin_menu == "Kelola TPS":
                 t_u17_24 = st.number_input("Pemilih Usia 17-24 Tahun (%)", min_value=0.0, value=13.6, step=0.1)
                 t_u25_44 = st.number_input("Pemilih Usia 25-44 Tahun (%)", min_value=0.0, value=29.7, step=0.1)
                 t_u45_plus = st.number_input("Pemilih Usia 45+ Tahun (%)", min_value=0.0, value=32.2, step=0.1)
+            
+            # Tambahan Input Perolehan Suara Partai Politik
+            st.markdown("---")
+            st.markdown("##### Perolehan Suara Partai Politik di TPS Baru Ini")
+            
+            try:
+                with sqlite3.connect(DB_PATH) as conn:
+                    df_all_partai = pd.read_sql_query("SELECT id_partai, nomor_urut, singkatan, nama_partai FROM partai ORDER BY nomor_urut", conn)
+            except Exception:
+                df_all_partai = pd.DataFrame()
+                
+            party_votes_input = {}
+            if not df_all_partai.empty:
+                col_pt1, col_pt2 = st.columns(2)
+                midpoint = (len(df_all_partai) + 1) // 2
+                for idx, row in df_all_partai.iterrows():
+                    label = f"No. {row['nomor_urut']} - {row['singkatan']} ({row['nama_partai']})"
+                    if idx < midpoint:
+                        with col_pt1:
+                            party_votes_input[row['id_partai']] = st.number_input(label, min_value=0, value=0, step=1, key=f"add_suara_{row['id_partai']}")
+                    else:
+                        with col_pt2:
+                            party_votes_input[row['id_partai']] = st.number_input(label, min_value=0, value=0, step=1, key=f"add_suara_{row['id_partai']}")
             
             submit_add_tps = st.form_submit_button("Simpan TPS Baru", use_container_width=True)
             
@@ -298,6 +356,27 @@ elif admin_menu == "Kelola TPS":
                         "persen_usia_45_plus_kec": t_u45_plus
                     }
                     if add_tps_record(new_data):
+                        # Simpan perolehan suara partai
+                        try:
+                            with sqlite3.connect(DB_PATH) as conn:
+                                cursor = conn.cursor()
+                                cursor.execute("""
+                                    SELECT t.id_tps 
+                                    FROM tps t
+                                    JOIN kelurahan k ON t.id_kelurahan = k.id_kelurahan
+                                    JOIN kecamatan kc ON k.id_kecamatan = kc.id_kecamatan
+                                    WHERE t.no_tps = ? AND k.nama_kelurahan = ? AND kc.nama_kecamatan = ?
+                                """, (t_no_tps.strip(), t_kel.strip().upper(), t_kec.strip().upper()))
+                                row_tps = cursor.fetchone()
+                                id_tps = row_tps[0] if row_tps else None
+                                
+                                if id_tps:
+                                    for p_id, val in party_votes_input.items():
+                                        cursor.execute("INSERT INTO suara_partai_tps (id_tps, id_partai, jumlah_suara) VALUES (?, ?, ?)", (id_tps, p_id, val))
+                                    conn.commit()
+                        except Exception as e:
+                            st.warning(f"Data TPS berhasil disimpan, namun gagal menyimpan suara partai: {e}")
+                            
                         st.success(f"Berhasil menyimpan data TPS {t_no_tps} Kelurahan {t_kel}!")
                         st.rerun()
                     else:
@@ -342,6 +421,57 @@ elif admin_menu == "Kelola TPS":
                         e_u25_44 = st.number_input("Pemilih Usia 25-44 Tahun (%)", min_value=0.0, value=float(tps_raw["persen_usia_25_44_kec"]), step=0.1)
                         e_u45_plus = st.number_input("Pemilih Usia 45+ Tahun (%)", min_value=0.0, value=float(tps_raw["persen_usia_45_plus_kec"]), step=0.1)
                     
+                    # Cari id_tps untuk menampilkan perolehan suara yang sudah ada
+                    try:
+                        with sqlite3.connect(DB_PATH) as conn:
+                            cursor = conn.cursor()
+                            cursor.execute("""
+                                SELECT t.id_tps 
+                                FROM tps t
+                                JOIN kelurahan k ON t.id_kelurahan = k.id_kelurahan
+                                JOIN kecamatan kc ON k.id_kecamatan = kc.id_kecamatan
+                                WHERE t.no_tps = ? AND k.nama_kelurahan = ? AND kc.nama_kecamatan = ?
+                            """, (edit_no_tps, edit_kel, edit_kec))
+                            row_tps = cursor.fetchone()
+                            id_tps = row_tps[0] if row_tps else None
+                    except Exception:
+                        id_tps = None
+                        
+                    st.markdown("---")
+                    st.markdown("##### Perolehan Suara Partai Politik di TPS Ini")
+                    
+                    df_votes_edit = pd.DataFrame()
+                    if id_tps:
+                        try:
+                            with sqlite3.connect(DB_PATH) as conn:
+                                df_votes_edit = pd.read_sql_query("""
+                                    SELECT 
+                                        p.id_partai,
+                                        p.nomor_urut,
+                                        p.singkatan,
+                                        p.nama_partai,
+                                        COALESCE(s.jumlah_suara, 0) AS jumlah_suara
+                                    FROM partai p
+                                    LEFT JOIN suara_partai_tps s ON p.id_partai = s.id_partai AND s.id_tps = ?
+                                    ORDER BY p.nomor_urut
+                                """, conn, params=(id_tps,))
+                        except Exception:
+                            pass
+                            
+                    party_votes_edit_input = {}
+                    if not df_votes_edit.empty:
+                        col_pet1, col_pet2 = st.columns(2)
+                        midpoint = (len(df_votes_edit) + 1) // 2
+                        for idx, row in df_votes_edit.iterrows():
+                            label = f"No. {row['nomor_urut']} - {row['singkatan']} ({row['nama_partai']})"
+                            val_cur = int(row['jumlah_suara'])
+                            if idx < midpoint:
+                                with col_pet1:
+                                    party_votes_edit_input[row['id_partai']] = st.number_input(label, min_value=0, value=val_cur, step=1, key=f"edit_suara_{row['id_partai']}")
+                            else:
+                                with col_pet2:
+                                    party_votes_edit_input[row['id_partai']] = st.number_input(label, min_value=0, value=val_cur, step=1, key=f"edit_suara_{row['id_partai']}")
+                    
                     submit_edit_tps = st.form_submit_button("Simpan Perubahan Data TPS", use_container_width=True)
                     
                     if submit_edit_tps:
@@ -365,6 +495,20 @@ elif admin_menu == "Kelola TPS":
                                 "persen_usia_45_plus_kec": e_u45_plus
                             }
                             if update_tps_record(tps_raw["id"], updated_data):
+                                # Update suara partai
+                                if id_tps:
+                                    try:
+                                        with sqlite3.connect(DB_PATH) as conn:
+                                            cursor = conn.cursor()
+                                            for p_id, val in party_votes_edit_input.items():
+                                                cursor.execute("SELECT id_suara FROM suara_partai_tps WHERE id_tps = ? AND id_partai = ?", (id_tps, p_id))
+                                                if cursor.fetchone():
+                                                    cursor.execute("UPDATE suara_partai_tps SET jumlah_suara = ? WHERE id_tps = ? AND id_partai = ?", (val, id_tps, p_id))
+                                                else:
+                                                    cursor.execute("INSERT INTO suara_partai_tps (id_tps, id_partai, jumlah_suara) VALUES (?, ?, ?)", (id_tps, p_id, val))
+                                            conn.commit()
+                                    except Exception as e:
+                                        st.warning(f"Data TPS berhasil diubah, namun gagal memperbarui suara partai: {e}")
                                 st.success("Perubahan data TPS berhasil disimpan!")
                                 st.rerun()
                             else:
@@ -398,3 +542,5 @@ elif admin_menu == "Kelola TPS":
                         st.rerun()
                     else:
                         st.error("Gagal menghapus data TPS dari database.")
+
+    pass

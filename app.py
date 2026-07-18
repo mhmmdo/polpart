@@ -105,6 +105,7 @@ data_historis = st.Page("pages/2_Data_Historis.py", title="Data Historis")
 prediksi = st.Page("pages/3_Prediksi.py", title="Prediksi RF")
 visualisasi = st.Page("pages/4_Visualisasi.py", title="Visualisasi & Peta")
 tentang = st.Page("pages/5_Tentang.py", title="Tentang Aplikasi")
+kelola_data = st.Page("pages/6_Kelola_Data.py", title="Kelola Data")
 
 # Membuat menu navigasi kustom menggunakan library streamlit-option-menu
 page_names = ["Dashboard", "Data Historis", "Prediksi", "Visualisasi", "Tentang"]
@@ -115,6 +116,12 @@ page_files = [
     "pages/4_Visualisasi.py",
     "pages/5_Tentang.py"
 ]
+page_icons = ["grid-fill", "table", "cpu", "map-fill", "info-circle-fill"]
+
+if st.session_state.get("role") == "admin":
+    page_names.insert(4, "Kelola Data")
+    page_files.insert(4, "pages/6_Kelola_Data.py")
+    page_icons.insert(4, "database-fill")
 
 current_page = st.session_state.get("current_page", "Dashboard")
 try:
@@ -137,7 +144,7 @@ with st.sidebar:
     selected = option_menu(
         "PolPart RF",
         options=page_names,
-        icons=["grid-fill", "table", "cpu", "map-fill", "info-circle-fill"],
+        icons=page_icons,
         menu_icon="activity",
         default_index=default_index,
         styles={
@@ -170,5 +177,10 @@ if selected != current_page:
 
 # Membuat navigasi bawaan streamlit dan menjalankannya secara tersembunyi
 # position="hidden" digunakan agar menu default Streamlit tidak muncul (tidak dobel dengan menu kustom kita)
-pg = st.navigation([dashboard, data_historis, prediksi, visualisasi, tentang], position="hidden")
+pages_to_register = [dashboard, data_historis, prediksi, visualisasi]
+if st.session_state.get("role") == "admin":
+    pages_to_register.append(kelola_data)
+pages_to_register.append(tentang)
+
+pg = st.navigation(pages_to_register, position="hidden")
 pg.run()

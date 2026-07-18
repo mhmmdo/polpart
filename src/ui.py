@@ -16,7 +16,8 @@ def setup_page(title: str = APP_TITLE):
         "Data Historis": "Data Historis",
         "Prediksi": "Prediksi",
         "Visualisasi": "Visualisasi",
-        "Tentang": "Tentang"
+        "Tentang": "Tentang",
+        "Kelola Data": "Kelola Data"
     }
     st.session_state["current_page"] = title_mapping.get(title, "Dashboard")
     inject_css()
